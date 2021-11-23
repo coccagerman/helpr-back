@@ -8,7 +8,7 @@ router.get('/', (req, res) => {
 
 /* Ejemplo petición get con parámetros de búsqueda con identificador */
 router.get('/:id', (req, res) => {
-  res.json({msg: 'Acá te envío el usuario con id === req.params.id'})
+  res.json({msg: 'Acá te envío el usuario con id === ' + req.params.id})
 })
 
 /* Ejemplo petición post */

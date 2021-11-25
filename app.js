@@ -1,6 +1,6 @@
 /* Load environment variables on dev environment */
 if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').parse()
+    require('dotenv').config()
 }
 
 /* Import and initialize express */

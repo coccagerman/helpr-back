@@ -1,9 +1,22 @@
 const express = require('express')
 const router = express.Router()
+const User = require('../models/user.model')
 
 /* Ejemplo petición get */
-router.get('/', (req, res) => {
-  res.json({msg: 'Acá te envío los usuarios'})
+router.get('/', async (req, res) => {
+
+  try {
+    const users = await User.find({})
+    
+    res.json({
+      users: users
+    })
+  } catch (err) {
+    res.json({
+      msg: 'Ocurrió un error al buscar usuarios'
+    })
+  }
+
 })
 
 /* Ejemplo petición get con parámetros de búsqueda con identificador */
@@ -12,11 +25,24 @@ router.get('/:id', (req, res) => {
 })
 
 /* Ejemplo petición post */
-router.post('/', (req, res) => {
-  res.json({
-      msg: 'Se ha creado un nuevo usuario.',
-      userData: req.body
+router.post('/', async (req, res) => {
+
+  const user = new User({
+    name: req.body.name
   })
+
+  try {
+    const newUser = await user.save()
+
+    res.json({
+      user: newUser
+    })
+  } catch (err) {
+    res.json({
+      msg: 'Ocurrió un error al crear el usuario.'
+    })
+  }
+
 })
 
 /* Ejemplo petición put */

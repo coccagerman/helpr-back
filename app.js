@@ -7,21 +7,49 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const app = express()
 
-/* Express configs */
-app.use(express.json())
-app.use(express.urlencoded({extended: false}))
-
 /* DB connection */
 const mongoose = require('mongoose')
-mongoose.connect(process.env.DATABASE_URL)
+mongoose.connect(process.env.DATABASE_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
 const db = mongoose.connection
 db.on('error', error => console.error(error))
 db.once('open', () => console.log('Connected to mongoose.'))
 
-/* Initialize server */
-const server = app.listen(process.env.PORT || 3002, () => console.log('Server is listening.') )
-server.on('error', error => console.log(error) )
+/* Import modules */
+const flash = require('express-flash')
+const session = require('express-session')
+const methodOverride = require('method-override')
+const passport = require('passport')
+const MongoDbStore = require('connect-mongo');
+
+/* Global middlewares */
+app.use(express.json())
+app.use(express.urlencoded({extended: false}))
+app.use(flash())
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoDbStore.create({
+    mongoUrl: process.env.DATABASE_URL,
+    collection: 'sessions'
+  }),
+  cookie: {
+    maxAge: 1000*60*60*24
+  }
+}))
+
+require('./passport-config')
+app.use(passport.initialize())
+app.use(passport.session())
+app.use(methodOverride('_method'))
 
 /* Routes */
 const users = require('./routes/users.route')
 app.use('/users', users)
+
+/* Initialize server */
+const server = app.listen(process.env.PORT || 3001, () => console.log('Server is listening.') )
+server.on('error', error => console.error(error) )

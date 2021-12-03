@@ -2,34 +2,35 @@ const User = require('./models/user.model')
 const LocalStrategy = require('passport-local').Strategy
 const bcrypt = require('bcrypt')
 
-function initializePassport(passport) {
+function initialize(passport, getUserByEmail, getUserById) {
 
-    const authenticateUser = async done => {
+    const authenticateUser = async (email, password, done) => {
+
+        const userFound = await getUserByEmail(email)
 
         /* Check if there's a user account created with that email */
-        const userFound = await User.findOne({email: req.body.email})
         if (!userFound) return done(null, false, {message: 'Cannot find user with that email'})
         
         /* Validate password */
         try {
-            const checkPassword = await bcrypt.compare(req.body.password, userFound.password)
+            const checkPassword = await bcrypt.compare(password, userFound.password)
 
             if (checkPassword) {
                 return done(null, userFound)
+
             } else {
                 return done(null, false, {message: 'Incorrect password'})
             }
             
         } catch (err) {
             return done(err)
-            
         }
     }
 
     passport.use(new LocalStrategy( { usernameField: 'email' }, authenticateUser) )
 
-    passport.serializeUser(done => { done(null, userFound.id) })
-    passport.deserializeUser(done => { done(null, userFound) })
+    passport.serializeUser((user, done) => { done(null, user.id) })
+    passport.deserializeUser((id, done) => { done(null, getUserById(id)) })
 }
 
-module.exports = initializePassport
+module.exports = initialize

@@ -2,33 +2,14 @@ const express = require('express')
 const router = express.Router()
 const bcrypt = require('bcrypt')
 const passport = require('passport')
-const flash = require('express-flash')
-const session = require('express-session')
-const methodOverride = require('method-override')
 
 const User = require('../models/user.model')
 const initializePassport = require('../passport-config')
-initializePassport(passport)
-
-const app = express()
-
-app.use(flash())
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false
-}))
-app.use(passport.initialize())
-app.use(passport.session())
-app.use(methodOverride('_method'))
-
-/* Middleware function to check if user is authenticated */
-function checkNotAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
-    return res.redirect('/')
-  }
-  next()
-}
+initializePassport(
+  passport,
+  email => User.findOne({email: email}),
+  id => User.findOne({id: id})
+  )
 
 /* ------- Routes ------- */
 /* Get all users */
@@ -69,9 +50,7 @@ router.post('/register', checkNotAuthenticated, async (req, res) => {
       about: req.body.about
     })
 
-    user.save()
-
-    res.send('Success - User created')
+    user.save().then(res.send('Success - User created'))
 
   } catch (err) {
     res.status(500).send(err)
@@ -80,22 +59,6 @@ router.post('/register', checkNotAuthenticated, async (req, res) => {
 })
 
 /* Login user */
-/* router.post('/login', async (req, res) => {
-
-  const userEmailExists = await User.findOne({email: req.body.email})
-  if (!userEmailExists) return res.status(400).send('Cannot find user')
-
-  const userFound = await User.findOne({email: req.body.email})
-
-  try {
-    const checkPassword = await bcrypt.compare(req.body.password, userFound.password)
-    checkPassword ? res.send('Success - User loged in') : res.send('Incorrect password')
-
-  } catch (err) {
-    res.status(500).send(err)
-  }
-
-}) */
 router.post('/login', checkNotAuthenticated, passport.authenticate('local', {
   successRedirect: '/',
   failureRedirect: '/login',
@@ -116,5 +79,12 @@ router.put('/:id', (req, res) => {
       userData: req.body
   })
 })
+
+function checkNotAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return res.redirect('/')
+  }
+  next()
+}
 
 module.exports = router

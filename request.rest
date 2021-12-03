@@ -1,24 +1,23 @@
-
-
-## Create new user
-# POST http://localhost:3002/users
-# content-type: application/json
-
-# {
-#     "name": "testUser5",
-#     "password": "testPassword",
-#     "email": "testUser5@gmail.com",
-#     "title": "testing manager",
-#     "about": "Lorem ipsum dolem dolor"
-# }
-
-POST http://localhost:3002/users/register
+// Register
+POST http://localhost:3001/users/register
 content-type: application/json
 
 {
-    "name": "testUser5",
+    "name": "testUser6",
     "password": "testPassword",
-    "email": "testUser5@gmail.com"
+    "email": "testUser6@gmail.com"
 }
 
-# GET http://localhost:3002/users/
+###
+// Login
+POST http://localhost:3001/users/login
+content-type: application/json
+
+{
+    "password": "testPassword",
+    "email": "testUser6@gmail.com"
+}
+
+###
+// Get all users
+GET http://localhost:3001/users/

@@ -18,6 +18,7 @@ db.on('error', error => console.error(error))
 db.once('open', () => console.log('Connected to mongoose.'))
 
 /* Import modules */
+const cors = require('cors');
 const flash = require('express-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
@@ -27,6 +28,7 @@ const MongoDbStore = require('connect-mongo');
 /* Global middlewares */
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
+app.use(cors())
 app.use(flash())
 app.use(session({
   secret: process.env.SESSION_SECRET,

@@ -27,6 +27,12 @@ router.get('/', async (req, res) => {
 
 })
 
+/* privateRoute */
+router.get('/privateRoute', checkAuthenticated, async (req, res) => {
+  console.log(req.isAuthenticated())
+  res.send('This is the private route')
+})
+
 /* Ejemplo petición get con parámetros de búsqueda con identificador */
 router.get('/:id', (req, res) => {
   res.json({msg: 'Acá te envío el usuario con id === ' + req.params.id})
@@ -79,6 +85,13 @@ router.put('/:id', (req, res) => {
       userData: req.body
   })
 })
+
+function checkAuthenticated(req, res, next) {
+  if (!req.isAuthenticated()) {
+    return res.redirect('/')
+  }
+  next()
+}
 
 function checkNotAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {

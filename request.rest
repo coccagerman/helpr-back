@@ -21,3 +21,11 @@ content-type: application/json
 ###
 // Get all users
 GET http://localhost:3001/users/
+
+###
+// PrivateRoute
+GET http://localhost:3001/users/privateRoute
+
+###
+// Logout
+DELETE http://localhost:3001/users/logout

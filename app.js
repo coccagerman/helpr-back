@@ -52,6 +52,9 @@ app.use(methodOverride('_method'))
 const users = require('./routes/users.route')
 app.use('/users', users)
 
+const profile = require('./routes/profile.route')
+app.use('/profile', profile)
+
 /* Initialize server */
 const server = app.listen(process.env.PORT || 3001, () => console.log('Server is listening.') )
 server.on('error', error => console.error(error) )

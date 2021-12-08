@@ -14,13 +14,14 @@ POST http://localhost:3001/users/login
 content-type: application/json
 
 {
-    "password": "testPassword",
-    "email": "testUser6@gmail.com"
+    "email": "test11@gmail.com",
+    "password": "test11"
 }
 
 ###
 // Get all users
-GET http://localhost:3001/users/
+GET http://localhost:3001/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjFhYjg5YzkxN2I5ZGJhMDE5YmJkZWM3IiwibmFtZSI6InRlc3QxMSIsImVtYWlsIjoidGVzdDExQGdtYWlsLmNvbSJ9LCJpYXQiOjE2Mzg5MjU2MjEsImV4cCI6MTYzOTAxMjAyMX0.RbGLHDg3jBhw9hidSTx1wmIxH_u-0M2zvWA3hTMiI6I
 
 ###
 // PrivateRoute
@@ -29,3 +30,14 @@ GET http://localhost:3001/users/privateRoute
 ###
 // Logout
 DELETE http://localhost:3001/users/logout
+
+
+###
+PUT http://localhost:3001/users/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjFiMGQ2NjM3ZTE2OWRkZWJmNzJjMThhIiwibmFtZSI6IkJyaWFuIFRlc3QiLCJlbWFpbCI6ImJyaWFudGVzdEBnbWFpbC5jb20ifSwiaWF0IjoxNjM4OTc5NDg5LCJleHAiOjE2MzkwNjU4ODl9.O8Bbm9mSDMBQc1uLi2B7oVZwV4O_eLk3JecyqrdB5dk
+content-type: application/json
+
+{
+    "fieldToEdit": "title",
+    "fieldData": "blablalba"
+}

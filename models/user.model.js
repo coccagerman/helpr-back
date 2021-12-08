@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    accountType: {
+        type: String,
+        required: true
+    },
     title: {
         type: String,
         required: false

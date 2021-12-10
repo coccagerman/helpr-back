@@ -3,27 +3,98 @@ const router = express.Router()
 const jwt = require('jsonwebtoken')
 
 const User = require('../models/user.model')
+const EducationRecord = require('../models/educationRecord.model')
 
 /* ------- Routes ------- */
-/* Get all users */
+/* Get logged in user info */
 router.get('/', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findOne({_id: req.user.user.id})
+    res.send(user)
 
-  let userInfo = User.findOne({_id: req.user.user.id})
-  res.send(userInfo)
+  } catch (err) {
+    res.status(500).send(err)
+  }
 })
 
-/* Ejemplo petición get con parámetros de búsqueda con identificador */
-router.get('/:id', (req, res) => {
-  res.json({msg: 'Acá te envío el usuario con id === ' + req.params.id})
+/* Edit logged in user */
+router.put('/', authenticateToken, async (req, res) => {
+  try {
+    const fieldToEdit = req.body.fieldToEdit
+    const fieldData = req.body.fieldData
+
+    switch (fieldToEdit) {
+      case 'title':
+        User.updateOne({_id: req.user.user.id}, {$set: {title: fieldData}}).then(res.status(200).json('Successful edition'))
+        break;
+
+      case 'about':
+        User.updateOne({_id: req.user.user.id}, {$set: {about: fieldData}}).then(res.status(200).json('Successful edition'))
+        break;
+
+      case 'education':
+        if(req.body.queryType === 'add') {
+          const educationRecord = new EducationRecord({
+            userId: req.user.user.id,
+            institution: fieldData.institution,
+            title: fieldData.title,
+            beginDate: fieldData.beginDate,
+            endDate: fieldData.endDate,
+            clasification: fieldData.clasification,
+            state: fieldData.state
+          })
+
+          educationRecord.save().then(res.status(200).json('Successful edition'))
+
+        } else if (req.body.queryType === 'edit') {
+
+          EducationRecord.updateOne({_id: fieldData.recordId}, {$set: {
+            institution: fieldData.institution,
+            title: fieldData.title,
+            beginDate: fieldData.beginDate,
+            endDate: fieldData.endDate,
+            clasification: fieldData.clasification,
+            state: fieldData.state
+          }}).then(res.status(200).json('Successful edition'))
+
+        } else if (req.body.queryType === 'delete') {
+          EducationRecord.deleteOne({_id: fieldData.recordId}).then(res.status(200).json('Successful edition'))
+          
+        } else {
+          res.status(200).json('queryType parameter missing')
+        }
+        break;
+
+      default:
+        res.json('Field not found')
+        break;
+    }
+
+  } catch (err) {
+    res.status(500).send(err)
+  }
 })
 
-/* Ejemplo petición put */
-router.put('/:id', (req, res) => {
-  res.json({
-      msg: 'Se ha modificado el usuario.',
-      id: req.params.id,
-      userData: req.body
-  })
+/* Get logged in user education records */
+router.get('/educationRecords', authenticateToken, async (req, res) => {
+  try {
+    const educationRecords = await EducationRecord.find({userId: req.user.user.id})
+    res.send(educationRecords)
+
+  } catch (err) {
+    res.status(500).send(err)
+  }
+})
+
+/* Get user info by id */
+router.get('user/:id', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.find({_id: req.params.id})
+    res.json(user)
+
+  } catch (err) {
+    res.status(500).send(err)
+  }
 })
 
 function authenticateToken(req, res, next) {

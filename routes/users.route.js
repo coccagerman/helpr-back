@@ -5,6 +5,7 @@ const passport = require('passport')
 const jwt = require('jsonwebtoken')
 
 const User = require('../models/user.model')
+
 const initializePassport = require('../passport-config')
 initializePassport(
   passport,
@@ -24,63 +25,16 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 })
 
-/* Get logged in user */
-router.get('/profile', authenticateToken, async (req, res) => {
-  try {
-    const user = await User.findOne({_id: req.user.user.id})
-    res.send(user)
-
-  } catch (err) {
-    res.status(500).send(err)
-  }
-})
-
-/* Edit logged in user */
-router.put('/profile', authenticateToken, async (req, res) => {
-  try {
-    const fieldToEdit = req.body.fieldToEdit
-    const fieldData = req.body.fieldData
-
-    switch (fieldToEdit) {
-      case 'title':
-        User.updateOne({_id: req.user.user.id}, {$set: {title: fieldData}}).then(res.json('Successful edition'))
-        break;
-
-      case 'about':
-        User.updateOne({_id: req.user.user.id}, {$set: {about: fieldData}}).then(res.json('Successful edition'))
-        break;
-
-      default:
-        res.json('Field not found')
-        break;
-    }
-
-  } catch (err) {
-    res.status(500).send(err)
-  }
-})
-
-/* Get user by id */
-router.get('user/:id', authenticateToken, async (req, res) => {
-  try {
-    const user = await User.find({_id: req.params.id})
-    res.json(user)
-
-  } catch (err) {
-    res.status(500).send(err)
-  }
-})
-
 /* Check if access token is valid */
 router.get('/validateToken', (req, res) => {
   const authHeader = req.headers['authorization']
   const token = authHeader && authHeader.split(' ')[1]
 
-  if (token === null) return res.status(401).send(JSON.stringify('No access token provided'))
+  if (token === null) return res.status(401).json('No access token provided')
 
   jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
-    if (err) return res.status(403).send(JSON.stringify('Wrong token provided'))
-    return res.status(200).send(JSON.stringify('Valid token'))
+    if (err) return res.status(403).json('Wrong token provided')
+    return res.status(200).json('Valid token')
   })
 })
 
@@ -89,7 +43,7 @@ router.post('/register', async (req, res) => {
 
   // Check if the email isn't already taken
   const emailIsTaken = await User.findOne({email: req.body.email})
-  if (emailIsTaken) return res.status(500).send(JSON.stringify('Email already used'))
+  if (emailIsTaken) return res.status(500).json('Email already used')
 
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10)
@@ -102,7 +56,7 @@ router.post('/register', async (req, res) => {
     })
 
     user.save().then(
-      res.status(200).send(JSON.stringify('Success - User created'))
+      res.status(200).json('Success - User created')
     )
 
   } catch (err) {
@@ -133,10 +87,10 @@ function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization']
   const token = authHeader && authHeader.split(' ')[1]
 
-  if (token === null) return res.status(401).send(JSON.stringify('No access token provided'))
+  if (token === null) return res.status(401).json('No access token provided')
 
   jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
-    if (err) return res.status(403).send(JSON.stringify('Wrong token provided'))
+    if (err) return res.status(403).json('Wrong token provided')
     req.user = user
     next()
   })

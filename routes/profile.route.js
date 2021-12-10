@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 
 const User = require('../models/user.model')
 const EducationRecord = require('../models/educationRecord.model')
+const ExperienceRecord = require('../models/experienceRecord.model')
 
 /* ------- Routes ------- */
 /* Get logged in user info */
@@ -61,12 +62,43 @@ router.put('/', authenticateToken, async (req, res) => {
           EducationRecord.deleteOne({_id: fieldData.recordId}).then(res.status(200).json('Successful edition'))
           
         } else {
-          res.status(200).json('queryType parameter missing')
+          res.status(400).json('queryType parameter missing')
         }
         break;
 
+        case 'experience':
+          if(req.body.queryType === 'add') {
+            const experienceRecord = new ExperienceRecord({
+              userId: req.user.user.id,
+              position: fieldData.position,
+              company: fieldData.company,
+              beginDate: fieldData.beginDate,
+              endDate: fieldData.endDate,
+              description: fieldData.description
+            })
+  
+            experienceRecord.save().then(res.status(200).json('Successful edition'))
+  
+          } else if (req.body.queryType === 'edit') {
+  
+            ExperienceRecord.updateOne({_id: fieldData.recordId}, {$set: {
+              position: fieldData.position,
+              company: fieldData.company,
+              beginDate: fieldData.beginDate,
+              endDate: fieldData.endDate,
+              description: fieldData.description
+            }}).then(res.status(200).json('Successful edition'))
+  
+          } else if (req.body.queryType === 'delete') {
+            ExperienceRecord.deleteOne({_id: fieldData.recordId}).then(res.status(200).json('Successful edition'))
+            
+          } else {
+            res.status(400).json('queryType parameter missing')
+          }
+          break;
+
       default:
-        res.json('Field not found')
+        res.status(400).json('Field not found')
         break;
     }
 
@@ -80,6 +112,17 @@ router.get('/educationRecords', authenticateToken, async (req, res) => {
   try {
     const educationRecords = await EducationRecord.find({userId: req.user.user.id})
     res.send(educationRecords)
+
+  } catch (err) {
+    res.status(500).send(err)
+  }
+})
+
+/* Get logged in user experience records */
+router.get('/experienceRecords', authenticateToken, async (req, res) => {
+  try {
+    const experienceRecords = await ExperienceRecord.find({userId: req.user.user.id})
+    res.send(experienceRecords)
 
   } catch (err) {
     res.status(500).send(err)

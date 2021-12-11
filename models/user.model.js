@@ -24,6 +24,11 @@ const userSchema = new mongoose.Schema({
     about: {
         type: String,
         required: false
+    },
+    interests: {
+        type: Array,
+        default: [],
+        required: false
     }
 })
 

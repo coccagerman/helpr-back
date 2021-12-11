@@ -66,36 +66,56 @@ router.put('/', authenticateToken, async (req, res) => {
         }
         break;
 
-        case 'experience':
-          if(req.body.queryType === 'add') {
-            const experienceRecord = new ExperienceRecord({
-              userId: req.user.user.id,
-              position: fieldData.position,
-              company: fieldData.company,
-              beginDate: fieldData.beginDate,
-              endDate: fieldData.endDate,
-              description: fieldData.description
-            })
-  
-            experienceRecord.save().then(res.status(200).json('Successful edition'))
-  
-          } else if (req.body.queryType === 'edit') {
-  
-            ExperienceRecord.updateOne({_id: fieldData.recordId}, {$set: {
-              position: fieldData.position,
-              company: fieldData.company,
-              beginDate: fieldData.beginDate,
-              endDate: fieldData.endDate,
-              description: fieldData.description
-            }}).then(res.status(200).json('Successful edition'))
-  
-          } else if (req.body.queryType === 'delete') {
-            ExperienceRecord.deleteOne({_id: fieldData.recordId}).then(res.status(200).json('Successful edition'))
-            
-          } else {
-            res.status(400).json('queryType parameter missing')
-          }
-          break;
+      case 'experience':
+        if(req.body.queryType === 'add') {
+          const experienceRecord = new ExperienceRecord({
+            userId: req.user.user.id,
+            position: fieldData.position,
+            company: fieldData.company,
+            beginDate: fieldData.beginDate,
+            endDate: fieldData.endDate,
+            description: fieldData.description
+          })
+
+          experienceRecord.save().then(res.status(200).json('Successful edition'))
+
+        } else if (req.body.queryType === 'edit') {
+
+          ExperienceRecord.updateOne({_id: fieldData.recordId}, {$set: {
+            position: fieldData.position,
+            company: fieldData.company,
+            beginDate: fieldData.beginDate,
+            endDate: fieldData.endDate,
+            description: fieldData.description
+          }}).then(res.status(200).json('Successful edition'))
+
+        } else if (req.body.queryType === 'delete') {
+          ExperienceRecord.deleteOne({_id: fieldData.recordId}).then(res.status(200).json('Successful edition'))
+          
+        } else {
+          res.status(400).json('queryType parameter missing')
+        }
+        break;
+
+      case 'interests':
+
+        if(req.body.queryType === 'add') {
+          console.log(fieldData)
+          User.updateOne({_id: req.user.user.id}, {$push: {interests: fieldData}}).then(res.status(200).json('Successful edition'))
+
+        } else if (req.body.queryType === 'delete') {
+
+          const user = await User.findOne({_id: req.user.user.id})
+          const previousInterests = user.interests
+          const newInterests = previousInterests.filter(interest => interest !== fieldData)
+
+          User.updateOne({_id: req.user.user.id}, {$set: {interests: newInterests}}).then(res.status(200).json('Successful edition'))
+          
+        } else {
+          res.status(400).json('queryType parameter missing')
+        }
+        
+        break;
 
       default:
         res.status(400).json('Field not found')

@@ -1,4 +1,7 @@
 const mongoose = require('mongoose')
+const path = require('path')
+
+const profilePictureBasePath = 'uploads/profilePictures'
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -21,6 +24,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    profilePicture: {
+        type: Buffer,
+        required: false
+    },
+    profilePictureType: {
+        type: String,
+        required: false
+    },
     about: {
         type: String,
         required: false
@@ -32,4 +43,11 @@ const userSchema = new mongoose.Schema({
     }
 })
 
+userSchema.virtual('profilePicturePath').get(function() {
+    if (this.profilePicture && this.profilePictureType){
+        return `data:${this.profilePictureType};charset=utf-8;base64,${this.profilePicture.toString('base64')}`
+    }
+})
+
 module.exports = mongoose.model('User', userSchema)
+module.exports.profilePictureBasePath = profilePictureBasePath

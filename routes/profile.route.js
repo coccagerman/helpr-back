@@ -1,10 +1,13 @@
 const express = require('express')
 const router = express.Router()
 const jwt = require('jsonwebtoken')
+const path = require('path')
 
 const User = require('../models/user.model')
 const EducationRecord = require('../models/educationRecord.model')
 const ExperienceRecord = require('../models/experienceRecord.model')
+
+const imageMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
 
 /* ------- Routes ------- */
 /* Get logged in user info */
@@ -14,7 +17,7 @@ router.get('/', authenticateToken, async (req, res) => {
     res.send(user)
 
   } catch (err) {
-    res.status(500).send(err)
+    res.status(500).json(err)
   }
 })
 
@@ -100,7 +103,6 @@ router.put('/', authenticateToken, async (req, res) => {
       case 'interests':
 
         if(req.body.queryType === 'add') {
-          console.log(fieldData)
           User.updateOne({_id: req.user.user.id}, {$push: {interests: fieldData}}).then(res.status(200).json('Successful edition'))
 
         } else if (req.body.queryType === 'delete') {
@@ -123,7 +125,39 @@ router.put('/', authenticateToken, async (req, res) => {
     }
 
   } catch (err) {
-    res.status(500).send(err)
+    res.status(500).json(err)
+    console.error(err)
+  }
+})
+
+/* Edit logged in user profile picture */
+router.post('/profilePicture', authenticateToken, async (req, res) => {
+  
+  const user = await User.findOne({_id: req.user.user.id})
+
+  try {
+
+    if (!req.body.FileEncodeBase64String) return res.status(400).json('profilePictureEncoded not found')
+    if (!imageMimeTypes.includes(req.body.fileType)) return res.status(400).json('Not allowed image type')
+
+    user.profilePicture = new Buffer.from(req.body.FileEncodeBase64String, 'base64')
+    user.profilePictureType = req.body.fileType
+    user.save().then(res.status(200).json('Successful edition'))
+
+  } catch (err) {
+    res.status(500).json(err)
+    console.error(err)
+  }
+})
+
+/* Get logged in user profile picture */
+router.get('/profilePicture', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findOne({_id: req.user.user.id})
+    res.json(user.profilePicturePath)
+
+  } catch (err) {
+    res.status(500).json(err)
   }
 })
 
@@ -134,7 +168,7 @@ router.get('/educationRecords', authenticateToken, async (req, res) => {
     res.send(educationRecords)
 
   } catch (err) {
-    res.status(500).send(err)
+    res.status(500).json(err)
   }
 })
 
@@ -145,7 +179,7 @@ router.get('/experienceRecords', authenticateToken, async (req, res) => {
     res.send(experienceRecords)
 
   } catch (err) {
-    res.status(500).send(err)
+    res.status(500).json(err)
   }
 })
 
@@ -156,7 +190,7 @@ router.get('user/:id', authenticateToken, async (req, res) => {
     res.json(user)
 
   } catch (err) {
-    res.status(500).send(err)
+    res.status(500).json(err)
   }
 })
 

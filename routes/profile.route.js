@@ -6,6 +6,7 @@ const path = require('path')
 const User = require('../models/user.model')
 const EducationRecord = require('../models/educationRecord.model')
 const ExperienceRecord = require('../models/experienceRecord.model')
+const VacancyRecord = require('../models/vacancyRecord.model')
 
 const imageMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
 
@@ -44,7 +45,7 @@ router.put('/', authenticateToken, async (req, res) => {
             title: fieldData.title,
             beginDate: fieldData.beginDate,
             endDate: fieldData.endDate,
-            clasification: fieldData.clasification,
+            classification: fieldData.classification,
             state: fieldData.state
           })
 
@@ -57,7 +58,7 @@ router.put('/', authenticateToken, async (req, res) => {
             title: fieldData.title,
             beginDate: fieldData.beginDate,
             endDate: fieldData.endDate,
-            clasification: fieldData.clasification,
+            classification: fieldData.classification,
             state: fieldData.state
           }}).then(res.status(200).json('Successful edition'))
 
@@ -99,6 +100,41 @@ router.put('/', authenticateToken, async (req, res) => {
           res.status(400).json('queryType parameter missing')
         }
         break;
+      
+      case 'vacancies':
+        if(req.body.queryType === 'add') {
+          const vacancyRecord = new VacancyRecord({
+            position: fieldData.position,
+            publisherId: req.user.user.id,
+            publisher: req.user.user,
+            classification: fieldData.classification,
+            beginDate: fieldData.beginDate,
+            endDate: fieldData.endDate,
+            detail: fieldData.detail,
+            requisites: fieldData.requisites
+          })
+
+          vacancyRecord.save().then(res.status(200).json('Successful edition'))
+
+        } else if (req.body.queryType === 'edit') {
+
+          VacancyRecord.updateOne({_id: fieldData.recordId}, {$set: {
+            position: fieldData.position,
+            classification: fieldData.classification,
+            beginDate: fieldData.beginDate,
+            endDate: fieldData.endDate,
+            detail: fieldData.detail,
+            requisites: fieldData.requisites
+          }}).then(res.status(200).json('Successful edition'))
+
+        } else if (req.body.queryType === 'delete') {
+          VacancyRecord.deleteOne({_id: fieldData.recordId}).then(res.status(200).json('Successful edition'))
+          
+        } else {
+          res.status(400).json('queryType parameter missing')
+        }
+
+        break;
 
       case 'interests':
 
@@ -139,6 +175,7 @@ router.post('/profilePicture', authenticateToken, async (req, res) => {
 
     if (!req.body.FileEncodeBase64String) return res.status(400).json('profilePictureEncoded not found')
     if (!imageMimeTypes.includes(req.body.fileType)) return res.status(400).json('Not allowed image type')
+    if (req.body.fileSize > 2000000) return res.status(400).json('Image size too big')
 
     user.profilePicture = new Buffer.from(req.body.FileEncodeBase64String, 'base64')
     user.profilePictureType = req.body.fileType
@@ -177,6 +214,17 @@ router.get('/experienceRecords', authenticateToken, async (req, res) => {
   try {
     const experienceRecords = await ExperienceRecord.find({userId: req.user.user.id})
     res.send(experienceRecords)
+
+  } catch (err) {
+    res.status(500).json(err)
+  }
+})
+
+/* Get vacancies records published by logged in user*/
+router.get('/vacanciesRecords', authenticateToken, async (req, res) => {
+  try {
+    const vacanciesRecords = await VacancyRecord.find({publisherId: req.user.user.id})
+    res.send(vacanciesRecords)
 
   } catch (err) {
     res.status(500).json(err)

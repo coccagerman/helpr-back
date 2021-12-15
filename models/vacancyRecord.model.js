@@ -1,42 +1,38 @@
 const mongoose = require('mongoose')
 
-const jobSchema = new mongoose.Schema({
-    name: {
+const vacancyRecordSchema = new mongoose.Schema({
+    position: {
+        type: String,
+        required: true
+    },
+    publisherId: {
         type: String,
         required: true
     },
     publisher: {
-        type: String,
+        type: Object,
         required: true
     },
     classification: {
         type: String,
         required: true
     },
-    publishedDate: {
+    beginDate: {
         type: Date,
         required: true
     },
-    estimatedTime: {
+    endDate: {
         type: String,
         required: true
     },
-    neededDedication: {
+    detail: {
         type: String,
         required: true
     },
     requisites: {
         type: String,
         required: true
-    },
-    description: {
-        type: String,
-        required: true
-    },
-    candidates: {
-        type: Array,
-        required: false
     }
 })
 
-module.exports = mongoose.model('Job', jobSchema)
+module.exports = mongoose.model('vacancyRecord', vacancyRecordSchema)

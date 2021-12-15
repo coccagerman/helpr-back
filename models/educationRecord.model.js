@@ -21,7 +21,7 @@ const educationRecordSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    clasification: {
+    classification: {
         type: String,
         required: false
     },

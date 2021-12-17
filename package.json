@@ -21,7 +21,8 @@
     "mongoose": "^6.0.13",
     "passport": "^0.5.0",
     "passport-facebook": "^3.0.0",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "passport-twitter": "^1.0.4"
   },
   "devDependencies": {
     "dotenv": "^10.0.0"

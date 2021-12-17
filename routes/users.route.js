@@ -16,6 +16,9 @@ initializePassportLocal(
 const initializePassportFacebook = require('../passportFacebook-config')
 initializePassportFacebook(passport)
 
+const initializePassportTwitter = require('../passportTwitter-config')
+initializePassportTwitter(passport)
+
 /* ------- Routes ------- */
 /* Get all users */
 router.get('/', authenticateToken, async (req, res) => {
@@ -86,13 +89,52 @@ router.post('/login',
 )
 
 /* Facebook login */
-router.get('/facebooklogin', passport.authenticate('facebook', { scope : ['email'] }))
+router.get('/facebookAuth', passport.authenticate('facebook', { scope : ['email'] }))
 
 /* Facebook login callback */
-// Facebook will redirect the user to this URL after approval.
-// Finish the authentication process by attempting to obtain an access token.
+// User is redirected to this URL after approval and finishes the authentication process by obtaining access token.
 router.get('/auth/facebook/callback',
   passport.authenticate('facebook'),
+  (req, res) => {
+
+    const userToSign = {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email
+    }
+
+    const token = jwt.sign({user: userToSign}, process.env.TOKEN_SECRET, {expiresIn: '24h'})
+    res.status(200).redirect(`http://localhost:3000/?jwt=${token}`)
+  }
+)
+
+/* Twitter login */
+router.get('/twitterAuth', passport.authenticate('twitter', { scope : ['email'] }))
+
+/* Twitter login callback */
+// User is redirected to this URL after approval and finishes the authentication process by obtaining access token.
+router.get('/auth/twitter/callback',
+  passport.authenticate('twitter'),
+  (req, res) => {
+
+    const userToSign = {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email
+    }
+
+    const token = jwt.sign({user: userToSign}, process.env.TOKEN_SECRET, {expiresIn: '24h'})
+    res.status(200).redirect(`http://localhost:3000/?jwt=${token}`)
+  }
+)
+
+/* Google login */
+router.get('/googleAuth', passport.authenticate('google', { scope : ['email'] }))
+
+/* Google login callback */
+// User is redirected to this URL after approval and finishes the authentication process by obtaining access token.
+router.get('/auth/google/callback',
+  passport.authenticate('google'),
   (req, res) => {
 
     const userToSign = {

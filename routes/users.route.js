@@ -6,12 +6,15 @@ const jwt = require('jsonwebtoken')
 
 const User = require('../models/user.model')
 
-const initializePassport = require('../passport-config')
-initializePassport(
+const initializePassportLocal = require('../passportLocal-config')
+initializePassportLocal(
   passport,
   email => User.findOne({email: email}),
   id => User.findOne({id: id})
-  )
+)
+
+const initializePassportFacebook = require('../passportFacebook-config')
+initializePassportFacebook(passport)
 
 /* ------- Routes ------- */
 /* Get all users */
@@ -79,6 +82,27 @@ router.post('/login',
 
     const token = jwt.sign({user: userToSign}, process.env.TOKEN_SECRET, {expiresIn: '24h'})
     res.status(200).json({accessToken: token})
+  }
+)
+
+/* Facebook login */
+router.get('/facebooklogin', passport.authenticate('facebook', { scope : ['email'] }))
+
+/* Facebook login callback */
+// Facebook will redirect the user to this URL after approval.
+// Finish the authentication process by attempting to obtain an access token.
+router.get('/auth/facebook/callback',
+  passport.authenticate('facebook'),
+  (req, res) => {
+
+    const userToSign = {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email
+    }
+
+    const token = jwt.sign({user: userToSign}, process.env.TOKEN_SECRET, {expiresIn: '24h'})
+    res.status(200).redirect(`http://localhost:3000/?jwt=${token}`)
   }
 )
 

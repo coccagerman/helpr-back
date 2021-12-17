@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const jwt = require('jsonwebtoken')
-const path = require('path')
 
 const User = require('../models/user.model')
 const EducationRecord = require('../models/educationRecord.model')
@@ -175,7 +174,7 @@ router.post('/profilePicture', authenticateToken, async (req, res) => {
 
     if (!req.body.FileEncodeBase64String) return res.status(400).json('profilePictureEncoded not found')
     if (!imageMimeTypes.includes(req.body.fileType)) return res.status(400).json('Not allowed image type')
-    if (req.body.fileSize > 2000000) return res.status(400).json('Image size too big')
+    if (req.body.fileSize > 2097152) return res.status(400).json('Image size too big')
 
     user.profilePicture = new Buffer.from(req.body.FileEncodeBase64String, 'base64')
     user.profilePictureType = req.body.fileType

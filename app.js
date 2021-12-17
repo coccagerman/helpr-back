@@ -19,9 +19,7 @@ db.once('open', () => console.log('Connected to mongoose.'))
 
 /* Import modules */
 const cors = require('cors');
-const flash = require('express-flash')
 const session = require('express-session')
-const methodOverride = require('method-override')
 const passport = require('passport')
 const MongoDbStore = require('connect-mongo');
 
@@ -29,7 +27,6 @@ const MongoDbStore = require('connect-mongo');
 app.use(express.json({limit: '50mb'}))
 app.use(express.urlencoded({extended: false}))
 app.use(cors())
-app.use(flash())
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -43,10 +40,10 @@ app.use(session({
   }
 }))
 
-require('./passport-config')
+require('./passportLocal-config')
+require('./passportFacebook-config')
 app.use(passport.initialize())
 app.use(passport.session())
-app.use(methodOverride('_method'))
 
 /* Routes */
 const users = require('./routes/users.route')

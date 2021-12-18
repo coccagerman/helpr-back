@@ -19,6 +19,9 @@ initializePassportFacebook(passport)
 const initializePassportTwitter = require('../passportTwitter-config')
 initializePassportTwitter(passport)
 
+const initializePassportGoogle = require('../passportGoogle-config')
+initializePassportGoogle(passport)
+
 /* ------- Routes ------- */
 /* Get all users */
 router.get('/', authenticateToken, async (req, res) => {
@@ -109,7 +112,7 @@ router.get('/auth/facebook/callback',
 )
 
 /* Twitter login */
-router.get('/twitterAuth', passport.authenticate('twitter', { scope : ['email'] }))
+router.get('/twitterAuth', passport.authenticate('twitter'))
 
 /* Twitter login callback */
 // User is redirected to this URL after approval and finishes the authentication process by obtaining access token.
@@ -129,7 +132,7 @@ router.get('/auth/twitter/callback',
 )
 
 /* Google login */
-router.get('/googleAuth', passport.authenticate('google', { scope : ['email'] }))
+router.get('/googleAuth', passport.authenticate('google', { scope: ['profile', 'email'] } ))
 
 /* Google login callback */
 // User is redirected to this URL after approval and finishes the authentication process by obtaining access token.

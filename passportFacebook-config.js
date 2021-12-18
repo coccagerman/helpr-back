@@ -4,8 +4,8 @@ const FacebookStrategy = require('passport-facebook').Strategy
 function initializePassportFacebook (passport) {
 
     passport.use(new FacebookStrategy({
-            clientID: 614328416548685,
-            clientSecret: 'c14224b7207936b24658d5d21b85ad27',
+            clientID: process.env.FACEBOOK_CLIENT_ID,
+            clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
             callbackURL: 'http://localhost:3001/users/auth/facebook/callback',
             profileFields: ['email', 'name']
         },

@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const User = require('../models/user.model')
 const EducationRecord = require('../models/educationRecord.model')
 const ExperienceRecord = require('../models/experienceRecord.model')
-const VacancyRecord = require('../models/vacancyRecord.model')
+const JobRecord = require('../models/jobRecord.model')
 
 const imageMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
 
@@ -28,6 +28,10 @@ router.put('/', authenticateToken, async (req, res) => {
     const fieldData = req.body.fieldData
 
     switch (fieldToEdit) {
+      case 'accountType':
+        User.updateOne({_id: req.user.user.id}, {$set: {accountType: fieldData}}).then(res.status(200).json('Successful edition'))
+        break;
+    
       case 'title':
         User.updateOne({_id: req.user.user.id}, {$set: {title: fieldData}}).then(res.status(200).json('Successful edition'))
         break;
@@ -100,9 +104,9 @@ router.put('/', authenticateToken, async (req, res) => {
         }
         break;
       
-      case 'vacancies':
+      case 'jobs':
         if(req.body.queryType === 'add') {
-          const vacancyRecord = new VacancyRecord({
+          const jobRecord = new JobRecord({
             position: fieldData.position,
             publisherId: req.user.user.id,
             publisher: req.user.user,
@@ -113,11 +117,11 @@ router.put('/', authenticateToken, async (req, res) => {
             requisites: fieldData.requisites
           })
 
-          vacancyRecord.save().then(res.status(200).json('Successful edition'))
+          jobRecord.save().then(res.status(200).json('Successful edition'))
 
         } else if (req.body.queryType === 'edit') {
 
-          VacancyRecord.updateOne({_id: fieldData.recordId}, {$set: {
+          JobRecord.updateOne({_id: fieldData.recordId}, {$set: {
             position: fieldData.position,
             classification: fieldData.classification,
             beginDate: fieldData.beginDate,
@@ -127,7 +131,7 @@ router.put('/', authenticateToken, async (req, res) => {
           }}).then(res.status(200).json('Successful edition'))
 
         } else if (req.body.queryType === 'delete') {
-          VacancyRecord.deleteOne({_id: fieldData.recordId}).then(res.status(200).json('Successful edition'))
+          JobRecord.deleteOne({_id: fieldData.recordId}).then(res.status(200).json('Successful edition'))
           
         } else {
           res.status(400).json('queryType parameter missing')
@@ -219,11 +223,11 @@ router.get('/experienceRecords', authenticateToken, async (req, res) => {
   }
 })
 
-/* Get vacancies records published by logged in user*/
-router.get('/vacanciesRecords', authenticateToken, async (req, res) => {
+/* Get jobs records published by logged in user*/
+router.get('/jobRecords', authenticateToken, async (req, res) => {
   try {
-    const vacanciesRecords = await VacancyRecord.find({publisherId: req.user.user.id})
-    res.send(vacanciesRecords)
+    const jobRecords = await JobRecord.find({publisherId: req.user.user.id})
+    res.send(jobRecords)
 
   } catch (err) {
     res.status(500).json(err)

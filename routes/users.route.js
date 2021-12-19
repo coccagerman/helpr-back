@@ -95,7 +95,7 @@ router.post('/login',
 router.get('/facebookAuth', passport.authenticate('facebook', { scope : ['email'] }))
 
 /* Facebook login callback */
-// User is redirected to this URL after approval and finishes the authentication process by obtaining access token.
+// User is redirected to this URL after approval and finishes the auth process by obtaining access token.
 router.get('/auth/facebook/callback',
   passport.authenticate('facebook'),
   (req, res) => {
@@ -115,7 +115,7 @@ router.get('/auth/facebook/callback',
 router.get('/twitterAuth', passport.authenticate('twitter'))
 
 /* Twitter login callback */
-// User is redirected to this URL after approval and finishes the authentication process by obtaining access token.
+// User is redirected to this URL after approval and finishes the auth process by obtaining access token.
 router.get('/auth/twitter/callback',
   passport.authenticate('twitter'),
   (req, res) => {
@@ -135,7 +135,7 @@ router.get('/auth/twitter/callback',
 router.get('/googleAuth', passport.authenticate('google', { scope: ['profile', 'email'] } ))
 
 /* Google login callback */
-// User is redirected to this URL after approval and finishes the authentication process by obtaining access token.
+// User is redirected to this URL after approval and finishes the auth process by obtaining access token.
 router.get('/auth/google/callback',
   passport.authenticate('google'),
   (req, res) => {

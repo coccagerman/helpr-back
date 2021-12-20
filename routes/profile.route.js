@@ -107,12 +107,13 @@ router.put('/', authenticateToken, async (req, res) => {
       case 'jobs':
         if(req.body.queryType === 'add') {
           const jobRecord = new JobRecord({
-            position: fieldData.position,
             publisherId: req.user.user.id,
             publisher: req.user.user,
+            publishedDate: fieldData.publishedDate,
+            position: fieldData.position,
+            hourDedication: fieldData.hourDedication,
+            projectDuration: fieldData.projectDuration,
             classification: fieldData.classification,
-            beginDate: fieldData.beginDate,
-            endDate: fieldData.endDate,
             detail: fieldData.detail,
             requisites: fieldData.requisites
           })
@@ -122,10 +123,11 @@ router.put('/', authenticateToken, async (req, res) => {
         } else if (req.body.queryType === 'edit') {
 
           JobRecord.updateOne({_id: fieldData.recordId}, {$set: {
+            publishedDate: fieldData.publishedDate,
             position: fieldData.position,
+            hourDedication: fieldData.hourDedication,
+            projectDuration: fieldData.projectDuration,
             classification: fieldData.classification,
-            beginDate: fieldData.beginDate,
-            endDate: fieldData.endDate,
             detail: fieldData.detail,
             requisites: fieldData.requisites
           }}).then(res.status(200).json('Successful edition'))

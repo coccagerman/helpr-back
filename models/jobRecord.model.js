@@ -1,10 +1,6 @@
 const mongoose = require('mongoose')
 
 const jobRecordSchema = new mongoose.Schema({
-    position: {
-        type: String,
-        required: true
-    },
     publisherId: {
         type: String,
         required: true
@@ -13,15 +9,23 @@ const jobRecordSchema = new mongoose.Schema({
         type: Object,
         required: true
     },
+    publishedDate: {
+        type: Date,
+        required: true
+    },
+    position: {
+        type: String,
+        required: true
+    },
     classification: {
         type: String,
         required: true
     },
-    beginDate: {
-        type: Date,
+    hourDedication: {
+        type: String,
         required: true
     },
-    endDate: {
+    projectDuration: {
         type: String,
         required: true
     },

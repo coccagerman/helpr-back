@@ -16,6 +16,23 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 })
 
+/* Get jobs filtered by params */
+  /* FIX - implementar filtros por fecha de publicación e intereses del publicante */
+router.put('/searchJobsWithParams', authenticateToken, async (req, res) => {
+  
+  console.log('req.body')
+  console.log(req.body)
+  
+  try {
+    const publishedJobs = await JobRecord.find(req.body.searchParams)
+    res.send(publishedJobs)
+
+  } catch (err) {
+    res.status(500).json(err)
+    console.log(err)
+  }
+})
+
 /* Get job by id */
 router.get('/:id', authenticateToken, async (req, res) => {
   try {

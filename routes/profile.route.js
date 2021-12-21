@@ -237,9 +237,20 @@ router.get('/jobRecords', authenticateToken, async (req, res) => {
 })
 
 /* Get user info by id */
-router.get('user/:id', authenticateToken, async (req, res) => {
+router.get('/user/:id', authenticateToken, async (req, res) => {
   try {
-    const user = await User.find({_id: req.params.id})
+    const user = await User.findOne({_id: req.params.id})
+    res.json(user)
+
+  } catch (err) {
+    res.status(500).json(err)
+  }
+})
+
+/* Get user info by token */
+router.get('/userGetByToken', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findOne({_id: req.user.user.id})
     res.json(user)
 
   } catch (err) {

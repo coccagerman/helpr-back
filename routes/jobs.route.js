@@ -3,6 +3,7 @@ const router = express.Router()
 const jwt = require('jsonwebtoken')
 
 const JobRecord = require('../models/jobRecord.model')
+const User = require('../models/user.model')
 
 /* ------- Routes ------- */
 /* Get all published jobs */
@@ -76,13 +77,52 @@ router.put('/searchJobsWithParams', authenticateToken, async (req, res) => {
 })
 
 /* Get job by id */
-router.get('/:id', authenticateToken, async (req, res) => {
+router.get('/:jobRecordId', authenticateToken, async (req, res) => {
   try {
-    const job = await JobRecord.findOne({id: req.params.id})
-    res.send(job)
+    const job = await JobRecord.findOne({_id: '61c205ed37cfad8768c16441'})
+    res.status(200).send(job)
 
   } catch (err) {
     res.status(500).json(err)
+  }
+})
+
+/* Job application */
+router.post('/jobApplication/:jobRecordId', authenticateToken, async (req, res) => {
+  try {
+    const job = await JobRecord.findOne({_id: req.params.jobRecordId})
+    const user = await User.findOne({_id: req.user.user.id})
+    
+    const newCandidate = {
+      id: req.user.user.id,
+      state: 'Pendiente de revisión',
+      applicationDate: new Date()
+    }
+
+    let previousApplicationsCheck = 0
+
+    job.candidates.forEach(candidate => {
+      if (candidate._id === newCandidate.id) {
+        previousApplicationsCheck++
+        return
+      }
+    })
+
+    if (previousApplicationsCheck > 0) res.status(300).json('Candidate already applied')
+    else {
+      job.candidates.push(newCandidate)
+      user.appliedJobs.push(job._id)
+
+      job.save().then(
+        user.save().then(
+          res.status(200).json('Application successful')
+        )
+      )
+    }
+
+  } catch (err) {
+    res.status(500).json(err)
+    console.log(err)
   }
 })
 

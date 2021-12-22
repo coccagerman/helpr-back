@@ -36,6 +36,11 @@ const jobRecordSchema = new mongoose.Schema({
     requisites: {
         type: String,
         required: true
+    },
+    candidates: {
+        type: Array,
+        required: true,
+        default: []
     }
 })
 

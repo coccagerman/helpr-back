@@ -106,9 +106,11 @@ router.put('/', authenticateToken, async (req, res) => {
       
       case 'jobs':
         if(req.body.queryType === 'add') {
+          const publisher = await User.findOne({_id: req.user.user.id})
+
           const jobRecord = new JobRecord({
             publisherId: req.user.user.id,
-            publisher: req.user.user,
+            publisher: publisher,
             publishedDate: fieldData.publishedDate,
             position: fieldData.position,
             hourDedication: fieldData.hourDedication,

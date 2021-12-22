@@ -17,16 +17,58 @@ router.get('/', authenticateToken, async (req, res) => {
 })
 
 /* Get jobs filtered by params */
-  /* FIX - implementar filtros por fecha de publicación e intereses del publicante */
 router.put('/searchJobsWithParams', authenticateToken, async (req, res) => {
   
-  console.log('req.body')
-  console.log(req.body)
-  
   try {
-    const publishedJobs = await JobRecord.find(req.body.searchParams)
-    res.send(publishedJobs)
+    if (req.body.searchPublisherInterestsParam && !req.body.searchPublishedDateParam) {
+      /* Filter by general params */
+      const publishedJobs = await JobRecord.find(req.body.searchParams)
+      /* Filter by publisher interests */
+      const publishedFilteredJobs = []
 
+      publishedJobs.forEach(job => {
+        if (job.publisher.interests && job.publisher.interests.indexOf(req.body.searchPublisherInterestsParam) !== -1) publishedFilteredJobs.push(job)
+      })
+      res.send(publishedFilteredJobs)
+    }
+    else if (!req.body.searchPublisherInterestsParam && req.body.searchPublishedDateParam) {
+
+      /* Filter by general params */
+      const publishedJobs = await JobRecord.find(req.body.searchParams)
+      /* Filter by published date */
+      const publishedFilteredJobs = []
+
+      const limitDate = new Date()
+      limitDate.setDate( limitDate.getDate() - parseInt(req.body.searchPublishedDateParam) );
+      
+      publishedJobs.forEach(job => { if (job.publishedDate > limitDate) publishedFilteredJobs.push(job) })
+    
+      res.send(publishedFilteredJobs)
+    }
+    else if (req.body.searchPublisherInterestsParam && req.body.searchPublishedDateParam) {
+      /* Filter by general params */
+      const publishedJobs = await JobRecord.find(req.body.searchParams)
+      /* Filter by publisher interests */
+      const publishedFilteredJobs = []
+
+      publishedJobs.forEach(job => {
+        if (job.publisher.interests && job.publisher.interests.indexOf(req.body.searchPublisherInterestsParam) !== -1) publishedFilteredJobs.push(job)
+      })
+
+      /* Filter by published date */
+      const publishedDoublyFilteredJobs = []
+
+      const limitDate = new Date()
+      limitDate.setDate( limitDate.getDate() - parseInt(req.body.searchPublishedDateParam) );
+      
+      publishedFilteredJobs.forEach(job => { if (job.publishedDate > limitDate) publishedDoublyFilteredJobs.push(job) })
+
+      res.send(publishedDoublyFilteredJobs)
+    }
+    else {
+      const publishedJobs = await JobRecord.find(req.body.searchParams)
+      res.send(publishedJobs)
+    }
   } catch (err) {
     res.status(500).json(err)
     console.log(err)

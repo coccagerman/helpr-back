@@ -79,7 +79,7 @@ router.put('/searchJobsWithParams', authenticateToken, async (req, res) => {
 /* Get job by id */
 router.get('/:jobRecordId', authenticateToken, async (req, res) => {
   try {
-    const job = await JobRecord.findOne({_id: '61c205ed37cfad8768c16441'})
+    const job = await JobRecord.findOne({_id: req.params.jobRecordId})
     res.status(200).send(job)
 
   } catch (err) {
@@ -96,7 +96,9 @@ router.post('/jobApplication/:jobRecordId', authenticateToken, async (req, res) 
     const newCandidate = {
       id: req.user.user.id,
       state: 'Pendiente de revisión',
-      applicationDate: new Date()
+      applicationDate: new Date(),
+      name: user.name,
+      title: user.title
     }
 
     let previousApplicationsCheck = 0

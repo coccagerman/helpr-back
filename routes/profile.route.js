@@ -242,7 +242,18 @@ router.get('/jobRecords', authenticateToken, async (req, res) => {
 router.get('/user/:id', authenticateToken, async (req, res) => {
   try {
     const user = await User.findOne({_id: req.params.id})
-    res.json(user)
+    const experienceRecords = await ExperienceRecord.find({userId: req.params.id})
+    const educationRecords = await EducationRecord.find({userId: req.params.id})
+    const jobRecords = await JobRecord.find({publisherId: req.params.id})
+
+    const fullUserProfile = {
+      basic: user,
+      experience: experienceRecords,
+      education: educationRecords,
+      publishedJobs: jobRecords
+    }
+
+    res.json(fullUserProfile)
 
   } catch (err) {
     res.status(500).json(err)

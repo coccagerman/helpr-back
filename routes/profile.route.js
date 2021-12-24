@@ -41,7 +41,7 @@ router.put('/', authenticateToken, async (req, res) => {
         break;
 
       case 'education':
-        if(req.body.queryType === 'add') {
+        if (req.body.queryType === 'add') {
           const educationRecord = new EducationRecord({
             userId: req.user.user.id,
             institution: fieldData.institution,
@@ -56,25 +56,38 @@ router.put('/', authenticateToken, async (req, res) => {
 
         } else if (req.body.queryType === 'edit') {
 
-          EducationRecord.updateOne({_id: fieldData.recordId}, {$set: {
-            institution: fieldData.institution,
-            title: fieldData.title,
-            beginDate: fieldData.beginDate,
-            endDate: fieldData.endDate,
-            classification: fieldData.classification,
-            state: fieldData.state
-          }}).then(res.status(200).json('Successful edition'))
+          const recordToEdit = await EducationRecord.findOne({_id: fieldData.recordId})
+          
+          if (recordToEdit.userId === req.user.user.id) {
+            EducationRecord.updateOne({_id: fieldData.recordId}, {$set: {
+              institution: fieldData.institution,
+              title: fieldData.title,
+              beginDate: fieldData.beginDate,
+              endDate: fieldData.endDate,
+              classification: fieldData.classification,
+              state: fieldData.state
+            }}).then(res.status(200).json('Successful edition'))
+          } else {
+            res.status(403).json('Not allowed')
+          }
 
         } else if (req.body.queryType === 'delete') {
-          EducationRecord.deleteOne({_id: fieldData.recordId}).then(res.status(200).json('Successful edition'))
+
+          const recordToDelete = await EducationRecord.findOne({_id: fieldData.recordId})
           
+          if (recordToDelete.userId === req.user.user.id) {
+            EducationRecord.deleteOne({_id: fieldData.recordId}).then(res.status(200).json('Successful edition'))
+          } else {
+            res.status(403).json('Not allowed')
+          }
+
         } else {
           res.status(400).json('queryType parameter missing')
         }
         break;
 
       case 'experience':
-        if(req.body.queryType === 'add') {
+        if (req.body.queryType === 'add') {
           const experienceRecord = new ExperienceRecord({
             userId: req.user.user.id,
             position: fieldData.position,
@@ -88,24 +101,35 @@ router.put('/', authenticateToken, async (req, res) => {
 
         } else if (req.body.queryType === 'edit') {
 
-          ExperienceRecord.updateOne({_id: fieldData.recordId}, {$set: {
-            position: fieldData.position,
-            company: fieldData.company,
-            beginDate: fieldData.beginDate,
-            endDate: fieldData.endDate,
-            description: fieldData.description
-          }}).then(res.status(200).json('Successful edition'))
+          const recordToEdit = await ExperienceRecord.findOne({_id: fieldData.recordId})
+          
+          if (recordToEdit.userId === req.user.user.id) {
+            ExperienceRecord.updateOne({_id: fieldData.recordId}, {$set: {
+              position: fieldData.position,
+              company: fieldData.company,
+              beginDate: fieldData.beginDate,
+              endDate: fieldData.endDate,
+              description: fieldData.description
+            }}).then(res.status(200).json('Successful edition'))
+          } else {
+            res.status(403).json('Not allowed')
+          }
 
         } else if (req.body.queryType === 'delete') {
-          ExperienceRecord.deleteOne({_id: fieldData.recordId}).then(res.status(200).json('Successful edition'))
+          const recordToDelete = await ExperienceRecord.findOne({_id: fieldData.recordId})
           
+          if (recordToDelete.userId === req.user.user.id) {
+            ExperienceRecord.deleteOne({_id: fieldData.recordId}).then(res.status(200).json('Successful edition'))
+          } else {
+            res.status(403).json('Not allowed')
+          }
         } else {
           res.status(400).json('queryType parameter missing')
         }
         break;
       
       case 'jobs':
-        if(req.body.queryType === 'add') {
+        if (req.body.queryType === 'add') {
           const publisher = await User.findOne({_id: req.user.user.id})
 
           const jobRecord = new JobRecord({
@@ -123,19 +147,32 @@ router.put('/', authenticateToken, async (req, res) => {
           jobRecord.save().then(res.status(200).json('Successful edition'))
 
         } else if (req.body.queryType === 'edit') {
-
-          JobRecord.updateOne({_id: fieldData.recordId}, {$set: {
-            publishedDate: fieldData.publishedDate,
-            position: fieldData.position,
-            hourDedication: fieldData.hourDedication,
-            projectDuration: fieldData.projectDuration,
-            classification: fieldData.classification,
-            detail: fieldData.detail,
-            requisites: fieldData.requisites
-          }}).then(res.status(200).json('Successful edition'))
+          
+          const recordToEdit = await JobRecord.findOne({_id: fieldData.recordId})
+          
+          if (recordToEdit.publisherId === req.user.user.id) {
+            JobRecord.updateOne({_id: fieldData.recordId}, {$set: {
+              publishedDate: fieldData.publishedDate,
+              position: fieldData.position,
+              hourDedication: fieldData.hourDedication,
+              projectDuration: fieldData.projectDuration,
+              classification: fieldData.classification,
+              detail: fieldData.detail,
+              requisites: fieldData.requisites
+            }}).then(res.status(200).json('Successful edition'))
+          } else {
+            res.status(403).json('Not allowed')
+          }
 
         } else if (req.body.queryType === 'delete') {
-          JobRecord.deleteOne({_id: fieldData.recordId}).then(res.status(200).json('Successful edition'))
+
+          const recordToDelete = await JobRecord.findOne({_id: fieldData.recordId})
+          
+          if (recordToDelete.publisherId === req.user.user.id) {
+            JobRecord.deleteOne({_id: fieldData.recordId}).then(res.status(200).json('Successful edition'))
+          } else {
+            res.status(403).json('Not allowed')
+          }
           
         } else {
           res.status(400).json('queryType parameter missing')
@@ -145,7 +182,7 @@ router.put('/', authenticateToken, async (req, res) => {
 
       case 'interests':
 
-        if(req.body.queryType === 'add') {
+        if (req.body.queryType === 'add') {
           User.updateOne({_id: req.user.user.id}, {$push: {interests: fieldData}}).then(res.status(200).json('Successful edition'))
 
         } else if (req.body.queryType === 'delete') {
@@ -169,7 +206,6 @@ router.put('/', authenticateToken, async (req, res) => {
 
   } catch (err) {
     res.status(500).json(err)
-    console.error(err)
   }
 })
 

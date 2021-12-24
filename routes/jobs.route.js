@@ -32,8 +32,8 @@ router.put('/searchJobsWithParams', authenticateToken, async (req, res) => {
       })
       res.send(publishedFilteredJobs)
     }
-    else if (!req.body.searchPublisherInterestsParam && req.body.searchPublishedDateParam) {
 
+    else if (!req.body.searchPublisherInterestsParam && req.body.searchPublishedDateParam) {
       /* Filter by general params */
       const publishedJobs = await JobRecord.find(req.body.searchParams)
       /* Filter by published date */
@@ -46,6 +46,7 @@ router.put('/searchJobsWithParams', authenticateToken, async (req, res) => {
     
       res.send(publishedFilteredJobs)
     }
+  
     else if (req.body.searchPublisherInterestsParam && req.body.searchPublishedDateParam) {
       /* Filter by general params */
       const publishedJobs = await JobRecord.find(req.body.searchParams)
@@ -72,7 +73,6 @@ router.put('/searchJobsWithParams', authenticateToken, async (req, res) => {
     }
   } catch (err) {
     res.status(500).json(err)
-    console.log(err)
   }
 })
 
@@ -104,7 +104,7 @@ router.post('/jobApplication/:jobRecordId', authenticateToken, async (req, res) 
     let previousApplicationsCheck = 0
 
     job.candidates.forEach(candidate => {
-      if (candidate._id === newCandidate.id) {
+      if (candidate.id === newCandidate.id) {
         previousApplicationsCheck++
         return
       }
@@ -124,7 +124,34 @@ router.post('/jobApplication/:jobRecordId', authenticateToken, async (req, res) 
 
   } catch (err) {
     res.status(500).json(err)
-    console.log(err)
+  }
+})
+
+/* Reject or reconsider candidate */
+router.put('/rejectOrReconsiderCandidate', authenticateToken, async (req, res) => {
+  try {
+
+    if(!req.body.jobRecordId || !req.body.candidateId || !req.body.queryType) res.status(400).json('Argument missing')
+    
+    const jobRecord = await JobRecord.findOne({_id: req.body.jobRecordId})
+
+    if (jobRecord.publisherId === req.user.user.id) {
+      jobRecord.candidates.forEach(candidate => {
+        if (candidate.id === req.body.candidateId) {
+          if (req.body.queryType === 'reconsider') candidate.state = 'Pendiente de revisión'
+          else if (req.body.queryType === 'reject') candidate.state = 'Rechazado'
+          else res.status(400).json('Wrong query type')
+          return
+        }
+      })
+
+      JobRecord.findOneAndUpdate({_id: req.body.jobRecordId}, {$set: {candidates: jobRecord.candidates}}).then(res.status(200).json('Successful edition'))
+    } else {
+      res.status(403).json('Not allowed')
+    }
+  } catch (err) {
+    res.status(500).json(err)
+    console.error(err)
   }
 })
 

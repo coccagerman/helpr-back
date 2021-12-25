@@ -141,7 +141,8 @@ router.put('/', authenticateToken, async (req, res) => {
             projectDuration: fieldData.projectDuration,
             classification: fieldData.classification,
             detail: fieldData.detail,
-            requisites: fieldData.requisites
+            requisites: fieldData.requisites,
+            isJobActive: true
           })
 
           jobRecord.save().then(res.status(200).json('Successful edition'))
@@ -158,7 +159,8 @@ router.put('/', authenticateToken, async (req, res) => {
               projectDuration: fieldData.projectDuration,
               classification: fieldData.classification,
               detail: fieldData.detail,
-              requisites: fieldData.requisites
+              requisites: fieldData.requisites,
+              isJobActive: fieldData.isJobActive
             }}).then(res.status(200).json('Successful edition'))
           } else {
             res.status(403).json('Not allowed')
@@ -290,6 +292,17 @@ router.get('/user/:id', authenticateToken, async (req, res) => {
     }
 
     res.json(fullUserProfile)
+
+  } catch (err) {
+    res.status(500).json(err)
+  }
+})
+
+/* Get user profile picture by id */
+router.get('/profilePicture/user/:id', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findOne({_id: req.params.id})
+    res.json(user.profilePicturePath)
 
   } catch (err) {
     res.status(500).json(err)

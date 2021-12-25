@@ -6,18 +6,20 @@ const JobRecord = require('../models/jobRecord.model')
 const User = require('../models/user.model')
 
 /* ------- Routes ------- */
-/* Get all published jobs */
+/* Get all published active jobs */
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const publishedJobs = await JobRecord.find()
-    res.send(publishedJobs)
+    const activeJobs = publishedJobs.filter(job => job.isJobActive)
+
+    res.send(activeJobs)
 
   } catch (err) {
     res.status(500).json(err)
   }
 })
 
-/* Get jobs filtered by params */
+/* Get active jobs filtered by params */
 router.put('/searchJobsWithParams', authenticateToken, async (req, res) => {
   
   try {
@@ -30,7 +32,7 @@ router.put('/searchJobsWithParams', authenticateToken, async (req, res) => {
       publishedJobs.forEach(job => {
         if (job.publisher.interests && job.publisher.interests.indexOf(req.body.searchPublisherInterestsParam) !== -1) publishedFilteredJobs.push(job)
       })
-      res.send(publishedFilteredJobs)
+      res.send(publishedFilteredJobs.filter(job => job.isJobActive))
     }
 
     else if (!req.body.searchPublisherInterestsParam && req.body.searchPublishedDateParam) {
@@ -44,7 +46,7 @@ router.put('/searchJobsWithParams', authenticateToken, async (req, res) => {
       
       publishedJobs.forEach(job => { if (job.publishedDate > limitDate) publishedFilteredJobs.push(job) })
     
-      res.send(publishedFilteredJobs)
+      res.send(publishedFilteredJobs.filter(job => job.isJobActive))
     }
   
     else if (req.body.searchPublisherInterestsParam && req.body.searchPublishedDateParam) {
@@ -65,11 +67,11 @@ router.put('/searchJobsWithParams', authenticateToken, async (req, res) => {
       
       publishedFilteredJobs.forEach(job => { if (job.publishedDate > limitDate) publishedDoublyFilteredJobs.push(job) })
 
-      res.send(publishedDoublyFilteredJobs)
+      res.send(publishedDoublyFilteredJobs.filter(job => job.isJobActive))
     }
     else {
       const publishedJobs = await JobRecord.find(req.body.searchParams)
-      res.send(publishedJobs)
+      res.send(publishedJobs.filter(job => job.isJobActive))
     }
   } catch (err) {
     res.status(500).json(err)
@@ -111,6 +113,8 @@ router.post('/jobApplication/:jobRecordId', authenticateToken, async (req, res) 
     })
 
     if (previousApplicationsCheck > 0) res.status(300).json('Candidate already applied')
+    else if (!job.isJobActive) res.status(300).json('Inactive job')
+
     else {
       job.candidates.push(newCandidate)
       user.appliedJobs.push(job._id)

@@ -41,6 +41,10 @@ const jobRecordSchema = new mongoose.Schema({
         type: Array,
         required: true,
         default: []
+    },
+    isJobActive: {
+        type: Boolean,
+        required: true
     }
 })
 

@@ -40,8 +40,7 @@ app.use(session({
   }
 }))
 
-require('./passportLocal-config')
-require('./passportFacebook-config')
+require('./passport/passportLocal-config')
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -54,6 +53,9 @@ app.use('/profile', profile)
 
 const jobs = require('./routes/jobs.route')
 app.use('/jobs', jobs)
+
+const candidates = require('./routes/candidates.route')
+app.use('/candidates', candidates)
 
 /* Initialize server */
 const server = app.listen(process.env.PORT || 3001, () => console.log('Server is listening.') )

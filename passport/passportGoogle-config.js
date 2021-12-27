@@ -1,4 +1,4 @@
-const User = require('./models/user.model')
+const User = require('../models/user.model')
 const GoogleStrategy = require('passport-google-oidc').Strategy
 
 function initializePassportGoogle (passport) {

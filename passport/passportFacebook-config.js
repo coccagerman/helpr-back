@@ -1,4 +1,4 @@
-const User = require('./models/user.model')
+const User = require('../models/user.model')
 const FacebookStrategy = require('passport-facebook').Strategy
 
 function initializePassportFacebook (passport) {

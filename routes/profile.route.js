@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const jwt = require('jsonwebtoken')
+
+const authenticateToken = require('../js/authenticateToken')
 
 const User = require('../models/user.model')
 const EducationRecord = require('../models/educationRecord.model')
@@ -286,6 +287,7 @@ router.get('/user/:id', authenticateToken, async (req, res) => {
 
     const fullUserProfile = {
       basic: user,
+      profilePicturePath: user.profilePicturePath,
       experience: experienceRecords,
       education: educationRecords,
       publishedJobs: jobRecords
@@ -319,18 +321,5 @@ router.get('/userGetByToken', authenticateToken, async (req, res) => {
     res.status(500).json(err)
   }
 })
-
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization']
-  const token = authHeader && authHeader.split(' ')[1]
-
-  if (token === null) return res.status(401).send(JSON.stringify('No access token provided'))
-
-  jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
-    if (err) return res.status(403).send(JSON.stringify('Wrong token provided'))
-    req.user = user
-    next()
-  })
-}
 
 module.exports = router

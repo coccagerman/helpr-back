@@ -5,21 +5,22 @@ const passport = require('passport')
 const jwt = require('jsonwebtoken')
 
 const User = require('../models/user.model')
+const authenticateToken = require('../js/authenticateToken')
 
-const initializePassportLocal = require('../passportLocal-config')
+const initializePassportLocal = require('../passport/passportLocal-config')
 initializePassportLocal(
   passport,
   email => User.findOne({email: email}),
   id => User.findOne({id: id})
 )
 
-const initializePassportFacebook = require('../passportFacebook-config')
+const initializePassportFacebook = require('../passport/passportFacebook-config')
 initializePassportFacebook(passport)
 
-const initializePassportTwitter = require('../passportTwitter-config')
+const initializePassportTwitter = require('../passport/passportTwitter-config')
 initializePassportTwitter(passport)
 
-const initializePassportGoogle = require('../passportGoogle-config')
+const initializePassportGoogle = require('../passport/passportGoogle-config')
 initializePassportGoogle(passport)
 
 /* ------- Routes ------- */
@@ -150,19 +151,5 @@ router.get('/auth/google/callback',
     res.status(200).redirect(`http://localhost:3000/?jwt=${token}`)
   }
 )
-
-/* Token validation middleware */
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization']
-  const token = authHeader && authHeader.split(' ')[1]
-
-  if (token === null) return res.status(401).json('No access token provided')
-
-  jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
-    if (err) return res.status(403).json('Wrong token provided')
-    req.user = user
-    next()
-  })
-}
 
 module.exports = router

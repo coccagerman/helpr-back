@@ -3,9 +3,10 @@ POST http://localhost:3001/users/register
 content-type: application/json
 
 {
-    "name": "testUser6",
+    "name": "testUser90",
     "password": "testPassword",
-    "email": "testUser6@gmail.com"
+    "email": "testUser90@gmail.com",
+    "accountType": "volunteer"
 }
 
 ###

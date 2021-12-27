@@ -7,26 +7,45 @@ const EducationRecord = require('../models/educationRecord.model')
 const authenticateToken = require('../js/authenticateToken')
 
 /* ------- Routes ------- */
-/* Get all volunteer users */
-router.get('/', authenticateToken, async (req, res) => {
+
+/* Get all volunteer users filtered by params */
+router.put('/searchCandidatesWithParams', authenticateToken, getVolunteerUsersFilteredByParams, async (req, res) => {
+
   try {
-    const volunteerUsers = await User.find({accountType: 'volunteer'})
+    /* Results pagination */
+    const page = parseInt(req.body.page)
+    const recordsPerPage = parseInt(req.body.recordsPerPage)
 
-    res.status(200).send(volunteerUsers)
+    const startIndex = (page-1)*recordsPerPage
+    const endIndex = page*recordsPerPage
 
+    const results = {}
+
+    results.results = req.searchResults.slice(startIndex, endIndex)
+    results.totalPages = Math.ceil(req.searchResults.length/recordsPerPage)
+    results.totalResults = req.searchResults.length
+    if (endIndex < req.searchResults.length) results.next = { page: page+1, recordsPerPage: recordsPerPage }
+    if (startIndex > 0) results.previous = { page: page-1, recordsPerPage: recordsPerPage }
+
+    console.log('req.body')
+    console.log(req.body)
+
+    res.status(200).json(results)
   } catch (err) {
     res.status(500).json(err)
   }
 })
 
-/* Get all volunteer users filtered by params */
-router.put('/searchCandidatesWithParams', authenticateToken, async (req, res) => {
-  
+/* Get volunteer users filtered by params  middleware */
+async function getVolunteerUsersFilteredByParams (req, res, next) {
   try {
     /* Get all volunteer profiles */
     const volunteerUsers = await User.find({accountType: 'volunteer'})
     /* No params provided */
-    if (!req.body.searchParams) res.status(200).send(volunteerUsers)
+    if (!req.body.searchParams) {
+      req.searchResults = volunteerUsers
+      next()
+    }
 
     /* Filter only by interests */
     else if (req.body.searchParams.interests && !req.body.searchParams.educationClassification && !req.body.searchParams.educationState) {
@@ -36,7 +55,9 @@ router.put('/searchCandidatesWithParams', authenticateToken, async (req, res) =>
       volunteerUsers.forEach(user => {
         if (user.interests && user.interests.indexOf(req.body.searchParams.interests) !== -1) volunteerUsersWithInterests.push(user)
       })
-      res.status(200).send(volunteerUsersWithInterests)
+
+      req.searchResults = volunteerUsersWithInterests
+      next()
     }
 
     /* Filter only by education classification */
@@ -49,7 +70,8 @@ router.put('/searchCandidatesWithParams', authenticateToken, async (req, res) =>
 
       const volunteerUsersWithEducationClassification = volunteerUsers.filter(user => recordsUserIds.indexOf(user.id) !== -1)
 
-      res.status(200).send(volunteerUsersWithEducationClassification)
+      req.searchResults = volunteerUsersWithEducationClassification
+      next()
     }
   
     /* Filter only by education state */
@@ -62,7 +84,8 @@ router.put('/searchCandidatesWithParams', authenticateToken, async (req, res) =>
 
       const volunteerUsersWithEducationState = volunteerUsers.filter(user => recordsUserIds.indexOf(user.id) !== -1)
 
-      res.status(200).send(volunteerUsersWithEducationState)
+      req.searchResults = volunteerUsersWithEducationState
+      next()
     }
 
     /* Filter by interests and education classification */
@@ -83,7 +106,8 @@ router.put('/searchCandidatesWithParams', authenticateToken, async (req, res) =>
 
       const volunteerUsersWithInterestsAndEducationClassification = volunteerUsersWithInterests.filter(user => recordsUserIds.indexOf(user.id) !== -1)
 
-      res.status(200).send(volunteerUsersWithInterestsAndEducationClassification)
+      req.searchResults = volunteerUsersWithInterestsAndEducationClassification
+      next()
     }
 
     /* Filter by interests and education state */
@@ -104,7 +128,8 @@ router.put('/searchCandidatesWithParams', authenticateToken, async (req, res) =>
 
       const volunteerUsersWithInterestsAndEducationState = volunteerUsersWithInterests.filter(user => recordsUserIds.indexOf(user.id) !== -1)      
 
-      res.status(200).send(volunteerUsersWithInterestsAndEducationState)
+      req.searchResults = volunteerUsersWithInterestsAndEducationState
+      next()
     }
 
     /* Filter by education state and classification */
@@ -117,7 +142,8 @@ router.put('/searchCandidatesWithParams', authenticateToken, async (req, res) =>
 
       const volunteerUsersWithEducationClassificationAndState = volunteerUsers.filter(user => recordsUserIds.indexOf(user.id) !== -1)
 
-      res.status(200).send(volunteerUsersWithEducationClassificationAndState)
+      req.searchResults = volunteerUsersWithEducationClassificationAndState
+      next()
     }
     /* Filter by interests, education state and classification */
     else {
@@ -136,12 +162,13 @@ router.put('/searchCandidatesWithParams', authenticateToken, async (req, res) =>
 
       const volunteerUsersWithInterestsAndEducationClassificationAndState = volunteerUsersWithInterests.filter(user => recordsUserIds.indexOf(user.id) !== -1)      
       
-      res.status(200).send(volunteerUsersWithInterestsAndEducationClassificationAndState)
+      req.searchResults = volunteerUsersWithInterestsAndEducationClassificationAndState
+      next()
     }
     
   } catch (err) {
     res.status(500).json(err)
   }
-})
+}
 
 module.exports = router

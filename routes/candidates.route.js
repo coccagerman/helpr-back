@@ -24,11 +24,8 @@ router.put('/searchCandidatesWithParams', authenticateToken, getVolunteerUsersFi
     results.results = req.searchResults.slice(startIndex, endIndex)
     results.totalPages = Math.ceil(req.searchResults.length/recordsPerPage)
     results.totalResults = req.searchResults.length
-    if (endIndex < req.searchResults.length) results.next = { page: page+1, recordsPerPage: recordsPerPage }
-    if (startIndex > 0) results.previous = { page: page-1, recordsPerPage: recordsPerPage }
-
-    console.log('req.body')
-    console.log(req.body)
+    /* if (endIndex < req.searchResults.length) results.next = { page: page+1, recordsPerPage: recordsPerPage }
+    if (startIndex > 0) results.previous = { page: page-1, recordsPerPage: recordsPerPage } */
 
     res.status(200).json(results)
   } catch (err) {

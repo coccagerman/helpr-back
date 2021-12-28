@@ -7,76 +7,32 @@ const JobRecord = require('../models/jobRecord.model')
 const User = require('../models/user.model')
 
 /* ------- Routes ------- */
-/* Get all published active jobs */
-router.get('/', authenticateToken, async (req, res) => {
-  try {
-    const publishedJobs = await JobRecord.find()
-    const activeJobs = publishedJobs.filter(job => job.isJobActive)
-
-    res.send(activeJobs)
-
-  } catch (err) {
-    res.status(500).json(err)
-  }
-})
 
 /* Get active jobs filtered by params */
-router.put('/searchJobsWithParams', authenticateToken, async (req, res) => {
-  
+router.put('/searchJobsWithParams', authenticateToken, getVolunteerUsersFilteredByParams, async (req, res) => {
+  console.log(req.body)
   try {
-    if (req.body.searchPublisherInterestsParam && !req.body.searchPublishedDateParam) {
-      /* Filter by general params */
-      const publishedJobs = await JobRecord.find(req.body.searchParams)
-      /* Filter by publisher interests */
-      const publishedFilteredJobs = []
+    /* Results pagination */
+    const page = parseInt(req.body.page)
+    const recordsPerPage = parseInt(req.body.recordsPerPage)
 
-      publishedJobs.forEach(job => {
-        if (job.publisher.interests && job.publisher.interests.indexOf(req.body.searchPublisherInterestsParam) !== -1) publishedFilteredJobs.push(job)
-      })
-      res.send(publishedFilteredJobs.filter(job => job.isJobActive))
-    }
+    const startIndex = (page-1)*recordsPerPage
+    const endIndex = page*recordsPerPage
 
-    else if (!req.body.searchPublisherInterestsParam && req.body.searchPublishedDateParam) {
-      /* Filter by general params */
-      const publishedJobs = await JobRecord.find(req.body.searchParams)
-      /* Filter by published date */
-      const publishedFilteredJobs = []
+    const results = {}
 
-      const limitDate = new Date()
-      limitDate.setDate( limitDate.getDate() - parseInt(req.body.searchPublishedDateParam) );
-      
-      publishedJobs.forEach(job => { if (job.publishedDate > limitDate) publishedFilteredJobs.push(job) })
+    results.results = req.searchResults.slice(startIndex, endIndex)
+    results.totalPages = Math.ceil(req.searchResults.length/recordsPerPage)
+    results.totalResults = req.searchResults.length
+    /* if (endIndex < req.searchResults.length) results.next = { page: page+1, recordsPerPage: recordsPerPage }
+    if (startIndex > 0) results.previous = { page: page-1, recordsPerPage: recordsPerPage } */
     
-      res.send(publishedFilteredJobs.filter(job => job.isJobActive))
-    }
-  
-    else if (req.body.searchPublisherInterestsParam && req.body.searchPublishedDateParam) {
-      /* Filter by general params */
-      const publishedJobs = await JobRecord.find(req.body.searchParams)
-      /* Filter by publisher interests */
-      const publishedFilteredJobs = []
-
-      publishedJobs.forEach(job => {
-        if (job.publisher.interests && job.publisher.interests.indexOf(req.body.searchPublisherInterestsParam) !== -1) publishedFilteredJobs.push(job)
-      })
-
-      /* Filter by published date */
-      const publishedDoublyFilteredJobs = []
-
-      const limitDate = new Date()
-      limitDate.setDate( limitDate.getDate() - parseInt(req.body.searchPublishedDateParam) );
-      
-      publishedFilteredJobs.forEach(job => { if (job.publishedDate > limitDate) publishedDoublyFilteredJobs.push(job) })
-
-      res.send(publishedDoublyFilteredJobs.filter(job => job.isJobActive))
-    }
-    else {
-      const publishedJobs = await JobRecord.find(req.body.searchParams)
-      res.send(publishedJobs.filter(job => job.isJobActive))
-    }
+    res.status(200).json(results)
   } catch (err) {
     res.status(500).json(err)
-  }
+    console.error(err)
+  }  
+
 })
 
 /* Get job by id */
@@ -159,5 +115,60 @@ router.put('/rejectOrReconsiderCandidate', authenticateToken, async (req, res) =
     console.error(err)
   }
 })
+
+/* Get active jobs filtered by params middleware */
+async function getVolunteerUsersFilteredByParams (req, res, next) {
+  /* Filter by general params */
+  const publishedJobs = await JobRecord.find(req.body.searchParams)
+  const publishedFilteredJobs = []
+
+  try {
+    if (req.body.searchPublisherInterestsParam && !req.body.searchPublishedDateParam) {
+      /* Filter by publisher interests */
+      publishedJobs.forEach(job => {
+        if (job.publisher.interests && job.publisher.interests.indexOf(req.body.searchPublisherInterestsParam) !== -1) publishedFilteredJobs.push(job)
+      })
+
+      req.searchResults = publishedFilteredJobs.filter(job => job.isJobActive)
+      next()
+    }
+
+    else if (!req.body.searchPublisherInterestsParam && req.body.searchPublishedDateParam) {
+      /* Filter by published date */
+      const limitDate = new Date()
+      limitDate.setDate( limitDate.getDate() - parseInt(req.body.searchPublishedDateParam) );
+      
+      publishedJobs.forEach(job => { if (job.publishedDate > limitDate) publishedFilteredJobs.push(job) })
+    
+      req.searchResults = publishedFilteredJobs.filter(job => job.isJobActive)
+      next()
+    }
+  
+    else if (req.body.searchPublisherInterestsParam && req.body.searchPublishedDateParam) {
+      /* Filter by publisher interests */
+      publishedJobs.forEach(job => {
+        if (job.publisher.interests && job.publisher.interests.indexOf(req.body.searchPublisherInterestsParam) !== -1) publishedFilteredJobs.push(job)
+      })
+
+      /* Filter by published date */
+      const publishedDoublyFilteredJobs = []
+
+      const limitDate = new Date()
+      limitDate.setDate( limitDate.getDate() - parseInt(req.body.searchPublishedDateParam) );
+      
+      publishedFilteredJobs.forEach(job => { if (job.publishedDate > limitDate) publishedDoublyFilteredJobs.push(job) })
+
+      req.searchResults = publishedDoublyFilteredJobs.filter(job => job.isJobActive)
+      next()
+    }
+    else {
+      req.searchResults = publishedJobs.filter(job => job.isJobActive)
+      next()
+    }
+  } catch (err) {
+    res.status(500).json(err)
+    console.error(err)
+  }
+}
 
 module.exports = router

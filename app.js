@@ -57,6 +57,9 @@ app.use('/jobs', jobs)
 const candidates = require('./routes/candidates.route')
 app.use('/candidates', candidates)
 
+const chat = require('./routes/chat.route')
+app.use('/chat', chat)
+
 /* Initialize server */
 const server = app.listen(process.env.PORT || 3001, () => console.log('Server is listening.') )
 server.on('error', error => console.error(error) )

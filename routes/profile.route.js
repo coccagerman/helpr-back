@@ -229,7 +229,6 @@ router.post('/profilePicture', authenticateToken, async (req, res) => {
 
   } catch (err) {
     res.status(500).json(err)
-    console.error(err)
   }
 })
 

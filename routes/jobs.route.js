@@ -30,7 +30,6 @@ router.put('/searchJobsWithParams', authenticateToken, getVolunteerUsersFiltered
     res.status(200).json(results)
   } catch (err) {
     res.status(500).json(err)
-    console.error(err)
   }  
 
 })
@@ -112,7 +111,6 @@ router.put('/rejectOrReconsiderCandidate', authenticateToken, async (req, res) =
     }
   } catch (err) {
     res.status(500).json(err)
-    console.error(err)
   }
 })
 
@@ -167,7 +165,6 @@ async function getVolunteerUsersFilteredByParams (req, res, next) {
     }
   } catch (err) {
     res.status(500).json(err)
-    console.error(err)
   }
 }
 

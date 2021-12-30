@@ -77,13 +77,22 @@ router.get('/getAllmessagesFromChatroom/:chatroomId', authenticateToken, async (
 /* Send new message to a chat room */
 router.post('/sendNewMessage/:chatroomId', authenticateToken, async (req, res) => {
   try {
-    const chatroom = await Chatroom.find({ id: req.params.chatroomId })
+    const chatroom = await Chatroom.findOne({ _id: req.params.chatroomId })
+
+    console.log('chatroom')
+    console.log(chatroom)
+    console.log('req.body.newMessage')
+    console.log(req.body.newMessage)
+
     chatroom.messages.push(req.body.newMessage)
     
     chatroom.save().then(res.status(200).json('Success - Message sent'))
+    console.log('chatroom')
+    console.log(chatroom)
 
   } catch (err) {
     res.status(500).send(err)
+    console.error(err)
   }
 })
 

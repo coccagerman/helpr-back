@@ -18,7 +18,7 @@ db.on('error', error => console.error(error))
 db.once('open', () => console.log('Connected to mongoose.'))
 
 /* CORS config */
-const corsOptions = { origin: 'https://helpr-front.vercel.app' }
+// const corsOptions = { origin: 'https://helpr-front.vercel.app' }
 
 /* Import modules */
 const cors = require('cors')
@@ -27,7 +27,7 @@ const passport = require('passport')
 const MongoDbStore = require('connect-mongo')
 
 /* Global middlewares */
-app.use(cors(corsOptions))
+app.use(cors())
 app.use(express.json({limit: '50mb'}))
 app.use(express.urlencoded({extended: false}))
 app.use(session({

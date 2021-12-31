@@ -18,14 +18,8 @@ db.on('error', error => console.error(error))
 db.once('open', () => console.log('Connected to mongoose.'))
 
 /* CORS config */
-const whitelist = ['http://localhost:3000', 'https://helpr-front.vercel.app']
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || whitelist.indexOf(origin) !== -1) callback(null, true)
-    else callback(new Error('Not allowed by CORS'))
-  },
-  credentials: true,
-}
+const corsOptions = { origin: 'https://helpr-front.vercel.app' }
+
 /* Import modules */
 const cors = require('cors')
 const session = require('express-session')

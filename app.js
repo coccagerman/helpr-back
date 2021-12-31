@@ -22,7 +22,6 @@ try {
 }
 
 /* CORS config */
-
 const whitelist = ['http://localhost:3000', 'https://helpr-front.vercel.app']
 const corsOptions = {
   origin: function (origin, callback) {

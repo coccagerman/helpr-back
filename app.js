@@ -17,16 +17,25 @@ const db = mongoose.connection
 db.on('error', error => console.error(error))
 db.once('open', () => console.log('Connected to mongoose.'))
 
+/* CORS config */
+const whitelist = ['http://localhost:3000', 'https://helpr-front.vercel.app/']
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || whitelist.indexOf(origin) !== -1) callback(null, true)
+    else callback(new Error('Not allowed by CORS'))
+  },
+  credentials: true,
+}
 /* Import modules */
-const cors = require('cors');
+const cors = require('cors')
 const session = require('express-session')
 const passport = require('passport')
-const MongoDbStore = require('connect-mongo');
+const MongoDbStore = require('connect-mongo')
 
 /* Global middlewares */
+app.use(cors(corsOptions))
 app.use(express.json({limit: '50mb'}))
 app.use(express.urlencoded({extended: false}))
-app.use(cors())
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,

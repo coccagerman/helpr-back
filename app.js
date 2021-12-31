@@ -1,7 +1,5 @@
 /* Load environment variables on dev environment */
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config()
-}
+if (process.env.NODE_ENV !== 'production') require('dotenv').config()
 
 /* Import and initialize express */
 const express = require('express')
@@ -9,13 +7,19 @@ const app = express()
 
 /* DB connection */
 const mongoose = require('mongoose')
-mongoose.connect(process.env.DATABASE_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-const db = mongoose.connection
-db.on('error', error => console.error(error))
-db.once('open', () => console.log('Connected to mongoose.'))
+
+try {
+  mongoose.connect(process.env.DATABASE_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+  const db = mongoose.connection
+  db.on('error', error => console.error(error))
+  db.once('open', () => console.log('Connected to mongoose.'))
+  
+} catch (err) {
+  console.error(err)
+}
 
 /* CORS config */
 // const corsOptions = { origin: 'https://helpr-front.vercel.app' }

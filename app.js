@@ -4,6 +4,15 @@ if (process.env.NODE_ENV !== 'production') require('dotenv').config()
 /* Import and initialize express */
 const express = require('express')
 const app = express()
+const server = require('http').Server(app)
+
+/* Websocket config */
+const io = require('socket.io')(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT']
+  }
+})
 
 /* DB connection */
 const mongoose = require('mongoose')
@@ -20,17 +29,6 @@ try {
 } catch (err) {
   console.error(err)
 }
-
-/* CORS config */
-/* const whitelist = ['http://localhost:3000', 'https://helpr-front.vercel.app']
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || whitelist.indexOf(origin) !== -1) callback(null, true)
-    else callback(new Error('Not allowed by CORS'))
-  },
-  credentials: true,
-  allowedHeaders: ["Content-Type"],
-} */
 
 /* Import modules */
 const cors = require('cors')
@@ -75,6 +73,33 @@ app.use('/candidates', candidates)
 const chat = require('./routes/chat.route')
 app.use('/chat', chat)
 
+/* Models */
+const Chatroom = require('./models/chatroom.model')
+
+/* Chat websocket */
+io.on('connection', socket => {
+  console.log('User connected')
+
+  socket.on('disconnect', () => console.log('User disconnected'))
+
+  socket.on('new-message', async data => {
+    try {
+      const chatroom = await Chatroom.findOne({ _id: data.chatroomId })
+
+      const {content, sentBy, date} = data
+
+      chatroom.messages.push({content, sentBy, date})
+      
+      chatroom.save().then(io.sockets.emit('messages', chatroom.messages))
+
+    } catch (err) {
+      console.error(err)
+      io.sockets.emit('error', err)
+    }    
+  })
+
+})
+
 /* Initialize server */
-const server = app.listen(process.env.PORT || 3001, () => console.log('Server is listening.') )
+server.listen(process.env.PORT || 3001, () => console.log('Server is listening.') )
 server.on('error', error => console.error(error) )

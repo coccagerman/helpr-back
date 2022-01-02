@@ -84,6 +84,7 @@ router.post('/sendNewMessage/:chatroomId', authenticateToken, async (req, res) =
     chatroom.save().then(res.status(200).json('Success - Message sent'))
 
   } catch (err) {
+    console.error(err)
     res.status(500).send(err)
   }
 })

@@ -86,11 +86,11 @@ io.on('connection', socket => {
     try {
       const chatroom = await Chatroom.findOne({ _id: data.chatroomId })
 
-      const {content, sentBy, date} = data
+      const {content, sentBy, date, chatroomId} = data
 
       chatroom.messages.push({content, sentBy, date})
       
-      chatroom.save().then(io.sockets.emit('messages', chatroom.messages))
+      chatroom.save().then(io.sockets.emit('messages', {chatroomId, messages: chatroom.messages}))
 
     } catch (err) {
       console.error(err)

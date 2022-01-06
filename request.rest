@@ -36,15 +36,12 @@ Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjFiOTEy
 content-type: application/json
 
 ###
-PUT http://localhost:3001/jobs/searchJobsWithParams
+PUT http://localhost:3001/candidates/searchCandidatesWithParams
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjFhYjg5YzkxN2I5ZGJhMDE5YmJkZWM3IiwibmFtZSI6InRlc3QxMSIsImVtYWlsIjoidGVzdDExQGdtYWlsLmNvbSJ9LCJpYXQiOjE2NDE0ODgwMTksImV4cCI6MTY0MTU3NDQxOX0.oDVa9ftpRwxKGbNiCh5jE6IEn2z_Hcwq0T9U6dwVeRA
 content-type: application/json
 
 {   
     "page": 1,
     "recordsPerPage": 50,
-    "searchParams": {
-        "projectDuration": "Menos de 3 días"
-    },
-    "searchTextSearchParam": "diseño"
+    "searchTextSearchParam": "software"
 }

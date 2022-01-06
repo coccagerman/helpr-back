@@ -1,10 +1,28 @@
 const express = require('express')
 const router = express.Router()
 
+const authenticateToken = require('../js/authenticateToken')
+
 const User = require('../models/user.model')
 const EducationRecord = require('../models/educationRecord.model')
 
-const authenticateToken = require('../js/authenticateToken')
+const { MeiliSearch } = require('meilisearch')
+const MeiliSearchClient = new MeiliSearch({ host: 'http://127.0.0.1:7700' })
+const candidatesIndex = MeiliSearchClient.index('candidates')
+
+/* ------- Set search engine index ------- */
+const setMeiliSearchIndex = async () => {
+  const volunteerUsers = await User.find({accountType: 'volunteer'})
+  const volunteerDocuments = []
+
+  volunteerUsers.forEach(volunteer => {
+    const {id, name, title, about, interests} = volunteer
+    volunteerDocuments.push({id, name, title, about, interests})
+  })
+
+  candidatesIndex.addDocuments(volunteerDocuments)
+}
+setMeiliSearchIndex()
 
 /* ------- Routes ------- */
 
@@ -36,8 +54,16 @@ router.put('/searchCandidatesWithParams', authenticateToken, getVolunteerUsersFi
 /* Get volunteer users filtered by params  middleware */
 async function getVolunteerUsersFilteredByParams (req, res, next) {
   try {
-    /* Get all volunteer profiles */
-    const volunteerUsers = await User.find({accountType: 'volunteer'})
+    /* Filter by searchText */
+    let volunteerUsers
+
+    if (req.body.searchTextSearchParam) {
+      const textSearchResults = await MeiliSearchClient.index('candidates').search(req.body.searchTextSearchParam)
+      volunteerUsers = textSearchResults.hits
+    } else {
+      volunteerUsers = await User.find({accountType: 'volunteer'})
+    }
+
     /* No params provided */
     if (!req.body.searchParams) {
       req.searchResults = volunteerUsers

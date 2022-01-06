@@ -7,11 +7,8 @@ const JobRecord = require('../models/jobRecord.model')
 const User = require('../models/user.model')
 
 const { MeiliSearch } = require('meilisearch')
-
 const MeiliSearchClient = new MeiliSearch({ host: 'http://127.0.0.1:7700' })
 const jobsIndex = MeiliSearchClient.index('jobs')
-
-// MeiliSearchClient.deleteIndex('jobs')
 
 /* ------- Set search engine index ------- */
 const setMeiliSearchIndex = async () => {

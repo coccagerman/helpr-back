@@ -74,31 +74,4 @@ router.get('/getAllmessagesFromChatroom/:chatroomId', authenticateToken, async (
   }
 })
 
-/* Send new message to a chat room */
-router.post('/sendNewMessage/:chatroomId', authenticateToken, async (req, res) => {
-  try {
-    const chatroom = await Chatroom.findOne({ _id: req.params.chatroomId })
-
-    chatroom.messages.push(req.body.newMessage)
-    
-    chatroom.save().then(res.status(200).json('Success - Message sent'))
-
-  } catch (err) {
-    console.error(err)
-    res.status(500).send(err)
-  }
-})
-
-/* Get all chat rooms */
-router.get('/getAllChatrooms', authenticateToken, async (req, res) => {
-  try {
-    const chatrooms = await Chatroom.find({})
-    res.status(200).json(chatrooms)
-
-  } catch (err) {
-    res.status(500).send(err)
-  }
-})
-
-
 module.exports = router

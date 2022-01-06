@@ -9,7 +9,7 @@ const server = require('http').Server(app)
 /* Websocket config */
 const io = require('socket.io')(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL,
     methods: ['GET', 'POST', 'PUT']
   }
 })
@@ -32,12 +32,14 @@ try {
 
 /* Import modules */
 const cors = require('cors')
+const compression = require('compression')
 const session = require('express-session')
 const passport = require('passport')
 const MongoDbStore = require('connect-mongo')
 
 /* Global middlewares */
 app.use(cors())
+app.use(compression())
 app.use(express.json({limit: '50mb'}))
 app.use(express.urlencoded({extended: false}))
 app.use(session({
@@ -78,9 +80,6 @@ const Chatroom = require('./models/chatroom.model')
 
 /* Chat websocket */
 io.on('connection', socket => {
-  console.log('User connected')
-
-  socket.on('disconnect', () => console.log('User disconnected'))
 
   socket.on('new-message', async data => {
     try {

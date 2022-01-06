@@ -6,11 +6,46 @@ const authenticateToken = require('../js/authenticateToken')
 const JobRecord = require('../models/jobRecord.model')
 const User = require('../models/user.model')
 
+const { MeiliSearch } = require('meilisearch')
+
+const MeiliSearchClient = new MeiliSearch({ host: 'http://127.0.0.1:7700' })
+const jobsIndex = MeiliSearchClient.index('jobs')
+
+// MeiliSearchClient.deleteIndex('jobs')
+
+/* ------- Set search engine index ------- */
+const setMeiliSearchIndex = async () => {
+  const publishedJobs = await JobRecord.find({isJobActive: true})
+  const jobDocuments = []
+
+  publishedJobs.forEach(job => {
+    
+    const {id, position, detail, requisites, classification, hourDedication, projectDuration, publishedDate, publisher, isJobActive} = job
+    const publisherInterests = publisher.interests
+
+    jobDocuments.push({
+      id,
+      position,
+      detail,
+      requisites,
+      classification,
+      hourDedication,
+      projectDuration,
+      publishedDate,
+      publisherInterests,
+      isJobActive
+    })
+  })
+
+  jobsIndex.addDocuments(jobDocuments)
+}
+setMeiliSearchIndex()
+
 /* ------- Routes ------- */
 
 /* Get active jobs filtered by params */
 router.put('/searchJobsWithParams', authenticateToken, getVolunteerUsersFilteredByParams, async (req, res) => {
-  console.log(req.body)
+
   try {
     /* Results pagination */
     const page = parseInt(req.body.page)
@@ -116,11 +151,25 @@ router.put('/rejectOrReconsiderCandidate', authenticateToken, async (req, res) =
 
 /* Get active jobs filtered by params middleware */
 async function getVolunteerUsersFilteredByParams (req, res, next) {
-  /* Filter by general params */
-  const publishedJobs = await JobRecord.find(req.body.searchParams)
-  const publishedFilteredJobs = []
 
   try {
+    /* Filter by general params and searchText */
+    let publishedJobs
+    const publishedFilteredJobs = []
+
+    if (req.body.searchTextSearchParam) {
+      const textSearchResults = await MeiliSearchClient.index('jobs').search(req.body.searchTextSearchParam)
+      let textAndParamsFilterResults = textSearchResults.hits
+      
+      if (req.body.searchParams.classification) textAndParamsFilterResults = textAndParamsFilterResults.filter(result => result.classification === req.body.searchParams.classification)
+      if (req.body.searchParams.hourDedication) textAndParamsFilterResults = textAndParamsFilterResults.filter(result => result.hourDedication === req.body.searchParams.hourDedication)
+      if (req.body.searchParams.projectDuration) textAndParamsFilterResults = textAndParamsFilterResults.filter(result => result.projectDuration === req.body.searchParams.projectDuration)
+
+      publishedJobs = textAndParamsFilterResults
+    } else {
+      publishedJobs = await JobRecord.find(req.body.searchParams)
+    }
+
     if (req.body.searchPublisherInterestsParam && !req.body.searchPublishedDateParam) {
       /* Filter by publisher interests */
       publishedJobs.forEach(job => {

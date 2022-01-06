@@ -36,6 +36,15 @@ Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjFiOTEy
 content-type: application/json
 
 ###
-GET http://localhost:3001/chat/getAllmessagesFromChatroom/61cca7190fe26dfb65e5593e
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjFiOTEyYmI5ZDMzNTBiYTBjYWI4MzM1IiwibmFtZSI6Ikd1aWxsZXJtbyBUZXN0b25pIiwiZW1haWwiOiJndWlsbGVybW9UZXN0b25pQGdtYWlsLmNvbSJ9LCJpYXQiOjE2NDA3OTc4MzQsImV4cCI6MTY0MDg4NDIzNH0.2MK-6y6snLmlxHVkTneuq7mKJWMYl68Taeo8ztJYpMY
+PUT http://localhost:3001/jobs/searchJobsWithParams
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjFhYjg5YzkxN2I5ZGJhMDE5YmJkZWM3IiwibmFtZSI6InRlc3QxMSIsImVtYWlsIjoidGVzdDExQGdtYWlsLmNvbSJ9LCJpYXQiOjE2NDE0ODgwMTksImV4cCI6MTY0MTU3NDQxOX0.oDVa9ftpRwxKGbNiCh5jE6IEn2z_Hcwq0T9U6dwVeRA
 content-type: application/json
+
+{   
+    "page": 1,
+    "recordsPerPage": 50,
+    "searchParams": {
+        "projectDuration": "Menos de 3 días"
+    },
+    "searchTextSearchParam": "diseño"
+}

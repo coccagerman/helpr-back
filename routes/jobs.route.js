@@ -6,11 +6,22 @@ const authenticateToken = require('../js/authenticateToken')
 const JobRecord = require('../models/jobRecord.model')
 const User = require('../models/user.model')
 
+/* ------- Nodemailer ------- */
+const nodemailer = require('nodemailer')
+const transporter = nodemailer.createTransport({
+  host: 'smtp.ethereal.email',
+  port: 587,
+  auth: {
+      user: 'allie.christiansen91@ethereal.email',
+      pass: '2RNQkQc8Ba2Dm7Tsxe'
+  }
+})
+
+/* ------- Text search engine ------- */
 const { MeiliSearch } = require('meilisearch')
 const MeiliSearchClient = new MeiliSearch({ host: 'http://127.0.0.1:7700' })
 const jobsIndex = MeiliSearchClient.index('jobs')
 
-/* ------- Set search engine index ------- */
 const setMeiliSearchIndex = async () => {
   const publishedJobs = await JobRecord.find({isJobActive: true})
   const jobDocuments = []
@@ -109,15 +120,32 @@ router.post('/jobApplication/:jobRecordId', authenticateToken, async (req, res) 
       job.candidates.push(newCandidate)
       user.appliedJobs.push(job._id)
 
+      const succesfulApplicationEmail = {
+        from: 'Helpr',
+        to: user.email,
+        subject: 'Helpr - Te postulaste exitosamente a una oportunidad de voluntariado',
+        html: '<p>Felictaciones, te postulaste exitosamente a una oportunidad de voluntariado. En caso de que la organización decida avanzar con tu postulación, se contactarán con vos directamente.<br>Helpr</p>'
+      }
+      
+      const sendEmail = new Promise((resolve, reject) => {
+        transporter.sendMail(succesfulApplicationEmail, (err, info) => {
+          if (err) reject (err)
+          resolve (info)
+        })
+      })
+
       job.save().then(
         user.save().then(
-          res.status(200).json('Application successful')
+          sendEmail.then(
+            res.status(200).json('Application successful')
+          )
         )
       )
     }
 
   } catch (err) {
     res.status(500).json(err)
+    console.error(err)
   }
 })
 

@@ -10,6 +10,17 @@ const JobRecord = require('../models/jobRecord.model')
 
 const imageMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
 
+/* ------- Nodemailer ------- */
+const nodemailer = require('nodemailer')
+const transporter = nodemailer.createTransport({
+  host: 'smtp.ethereal.email',
+  port: 587,
+  auth: {
+      user: 'allie.christiansen91@ethereal.email',
+      pass: '2RNQkQc8Ba2Dm7Tsxe'
+  }
+})
+
 /* ------- Routes ------- */
 /* Get logged in user info */
 router.get('/', authenticateToken, async (req, res) => {
@@ -146,7 +157,21 @@ router.put('/', authenticateToken, async (req, res) => {
             isJobActive: true
           })
 
-          jobRecord.save().then(res.status(200).json('Successful edition'))
+          const succesfulJobCreationEmail = {
+            from: 'Helpr',
+            to: publisher.email,
+            subject: 'Helpr - Publicaste exitosamente a una oportunidad de voluntariado',
+            html: '<p>Felictaciones, publicaste exitosamente a una oportunidad de voluntariado. Los candidatos interesados se postularán directamente a tu vacante, reciuerda revisar las postulaciones periódicamente.<br>Helpr</p>'
+          }
+          
+          const sendEmail = new Promise((resolve, reject) => {
+            transporter.sendMail(succesfulJobCreationEmail, (err, info) => {
+              if (err) reject (err)
+              resolve (info)
+            })
+          })
+
+          jobRecord.save().then(sendEmail.then(res.status(200).json('Successful edition')))
 
         } else if (req.body.queryType === 'edit') {
           
@@ -209,6 +234,7 @@ router.put('/', authenticateToken, async (req, res) => {
 
   } catch (err) {
     res.status(500).json(err)
+    console.error(err)
   }
 })
 

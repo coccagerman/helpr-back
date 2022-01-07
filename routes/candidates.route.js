@@ -6,11 +6,11 @@ const authenticateToken = require('../js/authenticateToken')
 const User = require('../models/user.model')
 const EducationRecord = require('../models/educationRecord.model')
 
+/* ------- Text search engine ------- */
 const { MeiliSearch } = require('meilisearch')
 const MeiliSearchClient = new MeiliSearch({ host: 'http://127.0.0.1:7700' })
 const candidatesIndex = MeiliSearchClient.index('candidates')
 
-/* ------- Set search engine index ------- */
 const setMeiliSearchIndex = async () => {
   const volunteerUsers = await User.find({accountType: 'volunteer'})
   const volunteerDocuments = []

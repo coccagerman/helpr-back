@@ -19,6 +19,7 @@ const setMeiliSearchIndex = async () => {
     
     const {id, position, detail, requisites, classification, hourDedication, projectDuration, publishedDate, publisher, isJobActive} = job
     const publisherInterests = publisher.interests
+    const publisherName = publisher.name
 
     jobDocuments.push({
       id,
@@ -30,6 +31,7 @@ const setMeiliSearchIndex = async () => {
       projectDuration,
       publishedDate,
       publisherInterests,
+      publisherName,
       isJobActive
     })
   })

@@ -16,7 +16,6 @@ Characteristics:
 - User authentication with Passport.js.
 - User authorization with JWT.
 - Chat implementation using websockets (Socket.io).
-- Text search implemented with Meilisearch.
 
 Main features:
 - The user can register and login using email and password, or social networks accounts (Google, Facebook or Twitter).

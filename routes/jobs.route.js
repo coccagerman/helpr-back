@@ -17,39 +17,6 @@ const transporter = nodemailer.createTransport({
   }
 })
 
-/* ------- Text search engine ------- */
-const { MeiliSearch } = require('meilisearch')
-const MeiliSearchClient = new MeiliSearch({ host: 'http://127.0.0.1:7700' })
-const jobsIndex = MeiliSearchClient.index('jobs')
-
-const setMeiliSearchIndex = async () => {
-  const publishedJobs = await JobRecord.find({isJobActive: true})
-  const jobDocuments = []
-
-  publishedJobs.forEach(job => {
-    
-    const {id, position, detail, requisites, classification, hourDedication, projectDuration, publishedDate, publisher, isJobActive} = job
-    const publisherInterests = publisher.interests
-    const publisherName = publisher.name
-
-    jobDocuments.push({
-      id,
-      position,
-      detail,
-      requisites,
-      classification,
-      hourDedication,
-      projectDuration,
-      publishedDate,
-      publisherInterests,
-      publisherName,
-      isJobActive
-    })
-  })
-
-  jobsIndex.addDocuments(jobDocuments)
-}
-setMeiliSearchIndex()
 
 /* ------- Routes ------- */
 
@@ -184,18 +151,7 @@ async function getVolunteerUsersFilteredByParams (req, res, next) {
     let publishedJobs
     const publishedFilteredJobs = []
 
-    if (req.body.searchTextSearchParam) {
-      const textSearchResults = await MeiliSearchClient.index('jobs').search(req.body.searchTextSearchParam)
-      let textAndParamsFilterResults = textSearchResults.hits
-      
-      if (req.body.searchParams.classification) textAndParamsFilterResults = textAndParamsFilterResults.filter(result => result.classification === req.body.searchParams.classification)
-      if (req.body.searchParams.hourDedication) textAndParamsFilterResults = textAndParamsFilterResults.filter(result => result.hourDedication === req.body.searchParams.hourDedication)
-      if (req.body.searchParams.projectDuration) textAndParamsFilterResults = textAndParamsFilterResults.filter(result => result.projectDuration === req.body.searchParams.projectDuration)
-
-      publishedJobs = textAndParamsFilterResults
-    } else {
-      publishedJobs = await JobRecord.find(req.body.searchParams)
-    }
+    publishedJobs = await JobRecord.find(req.body.searchParams)
 
     if (req.body.searchPublisherInterestsParam && !req.body.searchPublishedDateParam) {
       /* Filter by publisher interests */
